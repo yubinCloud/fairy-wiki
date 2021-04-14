@@ -1,5 +1,12 @@
 # 应用名称
-spring.application.name: fairy-wiki
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1/hotel?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT&useSSL=true&allowMultiQueries=true
+    username: wiki
+    password: yubin3869
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  application:
+    name: fairy-wiki
 # 应用服务 WEB 访问端口
 server.port: 8880
 
