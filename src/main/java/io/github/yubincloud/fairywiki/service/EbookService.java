@@ -4,6 +4,7 @@ import io.github.yubincloud.fairywiki.domain.Ebook;
 import io.github.yubincloud.fairywiki.domain.EbookExample;
 import io.github.yubincloud.fairywiki.dto.resp.EbookRespDto;
 import io.github.yubincloud.fairywiki.mapper.EbookMapper;
+import io.github.yubincloud.fairywiki.utils.CopyUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,13 +32,7 @@ public class EbookService {
         EbookExample.Criteria criteria = ebookExample.createCriteria();
         criteria.andNameLike("%" + name + "%");
         List<Ebook> ebookList = ebookMapper.selectByExample(ebookExample);
-        // 将 ebookList 中的数据映射到 dto 数据
-        List<EbookRespDto> ebookRespDtoList = new ArrayList<>();
-        for (Ebook ebook : ebookList) {
-            EbookRespDto ebookRespDto = new EbookRespDto();
-            BeanUtils.copyProperties(ebook, ebookRespDto);
-            ebookRespDtoList.add(ebookRespDto);
-        }
-        return ebookRespDtoList;
+        // 将 ebookList 拷贝至 dto 对象列表并返回
+        return CopyUtil.copyList(ebookList, EbookRespDto.class);
     }
 }
