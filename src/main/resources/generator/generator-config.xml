@@ -40,6 +40,6 @@
                              targetPackage="io.github.yubincloud.fairywiki.mapper"
                              type="XMLMAPPER"/>
 
-        <table tableName="demo"/>
+        <table tableName="ebook" domainObjectName="Ebook"/>
     </context>
 </generatorConfiguration>
