@@ -19,6 +19,9 @@ public class EbookController {
     @Resource
     private EbookService ebookService;
 
+    /**
+     * 根据书名进行电子书的模糊查询接口
+     */
     @GetMapping("/list")
     public RestfulModel<List<EbookRespDto>> list(EbookReqDto ebookReqDto) {
         List<EbookRespDto> bookList = ebookService.fuzzyQueryByName(ebookReqDto.getName());

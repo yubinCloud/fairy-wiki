@@ -21,12 +21,17 @@ public class EbookService {
         return ebookMapper.selectByExample(null);
     }
 
+    /**
+     * 根据 ebook 的 name 进行模糊查询
+     * @param name ebook的书名
+     */
     public List<EbookRespDto> fuzzyQueryByName(String name) {
+        // 对数据库进行模糊查询
         EbookExample ebookExample = new EbookExample();
         EbookExample.Criteria criteria = ebookExample.createCriteria();
         criteria.andNameLike("%" + name + "%");
         List<Ebook> ebookList = ebookMapper.selectByExample(ebookExample);
-
+        // 将 ebookList 中的数据映射到 dto 数据
         List<EbookRespDto> ebookRespDtoList = new ArrayList<>();
         for (Ebook ebook : ebookList) {
             EbookRespDto ebookRespDto = new EbookRespDto();
