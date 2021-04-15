@@ -1,4 +1,4 @@
-package io.github.yubincloud.fairywiki.resp;
+package io.github.yubincloud.fairywiki.dto.resp;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

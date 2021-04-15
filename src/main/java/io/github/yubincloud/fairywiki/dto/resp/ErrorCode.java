@@ -1,4 +1,4 @@
-package io.github.yubincloud.fairywiki.resp;
+package io.github.yubincloud.fairywiki.dto.resp;
 
 public class ErrorCode {
 
