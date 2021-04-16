@@ -50,13 +50,14 @@
     >
       <pre>
         {{ ebooks }}
+        {{ ebooks2 }}
       </pre>
     </a-layout-content>
   </a-layout>
 </template>
 
 <script lang="ts">
-import {defineComponent, onMounted, ref} from 'vue';
+import {defineComponent, onMounted, ref, reactive, toRef} from 'vue';
 import axios from 'axios';
 
 export default defineComponent({
@@ -64,6 +65,7 @@ export default defineComponent({
   setup() {
     console.log("setup");
     const ebooks = ref();
+    const ebooks1 = reactive({books: []});
 
     onMounted(() => {
       console.log("onMounted");
@@ -71,11 +73,13 @@ export default defineComponent({
         console.log(response);
         const respData = response.data;
         ebooks.value = respData.data;
+        ebooks1.books = respData.data;
       })
     })
 
     return {
-      ebooks
+      ebooks,
+      ebooks2: toRef(ebooks1, "books")
     }
   }
 });
