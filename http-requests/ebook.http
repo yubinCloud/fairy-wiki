@@ -9,10 +9,10 @@ Accept: application/json
 
 ###
 
-GET http://localhost:8880/ebook/all
+GET http://localhost:8880/ebook/list
 Accept: application/json
 
 ###
 
-GET http://localhost:8880/ebook/all?pageNum=1&pageSize=3
+GET http://localhost:8880/ebook/list?pageNum=1&pageSize=3
 Accept: application/json
