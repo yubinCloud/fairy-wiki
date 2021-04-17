@@ -24,7 +24,7 @@ public class EbookController {
     /**
      * 获取全部的电子书信息
      */
-    @GetMapping("/all")
+    @GetMapping("/list")
     public RestfulModel<PageRespDto<EbookRespDto>> getAllEbook(PageReqDto pageReqDto) {
         PageRespDto<EbookRespDto> bookList = ebookService.queryAll(pageReqDto.getPageNum(), pageReqDto.getPageSize());
         return new RestfulModel<>(ErrorCode.SUCCESS, "", bookList);
@@ -33,7 +33,7 @@ public class EbookController {
     /**
      * 根据书名进行电子书的模糊查询接口
      */
-    @GetMapping("/list")
+    @GetMapping("/list2")
     public RestfulModel<List<EbookRespDto>> list(EbookReqDto ebookReqDto) {
         List<EbookRespDto> bookList = ebookService.fuzzyQueryByName(ebookReqDto.getName());
         return new RestfulModel<>(ErrorCode.SUCCESS, "", bookList);
