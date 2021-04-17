@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class EbookRespDto {
+    private Long id;
+
     private String name;
 
     private Long category1Id;

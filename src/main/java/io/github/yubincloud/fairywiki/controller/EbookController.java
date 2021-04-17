@@ -20,6 +20,15 @@ public class EbookController {
     private EbookService ebookService;
 
     /**
+     * 获取全部的电子书信息
+     */
+    @GetMapping("/all")
+    public RestfulModel<List<EbookRespDto>> getAllEbook() {
+        List<EbookRespDto> bookList = ebookService.queryAll();
+        return new RestfulModel<>(ErrorCode.SUCCESS, "", bookList);
+    }
+
+    /**
      * 根据书名进行电子书的模糊查询接口
      */
     @GetMapping("/list")

@@ -5,11 +5,9 @@ import io.github.yubincloud.fairywiki.domain.EbookExample;
 import io.github.yubincloud.fairywiki.dto.resp.EbookRespDto;
 import io.github.yubincloud.fairywiki.mapper.EbookMapper;
 import io.github.yubincloud.fairywiki.utils.CopyUtil;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,8 +16,12 @@ public class EbookService {
     @Autowired
     private EbookMapper ebookMapper;
 
-    public List<Ebook> list() {
-        return ebookMapper.selectByExample(null);
+    /**
+     * 查询数据库中的全部 ebook
+     */
+    public List<EbookRespDto> queryAll() {
+        List<Ebook> ebookList = ebookMapper.selectByExample(null);
+        return CopyUtil.copyList(ebookList, EbookRespDto.class);
     }
 
     /**
