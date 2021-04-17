@@ -1,5 +1,6 @@
 package io.github.yubincloud.fairywiki.service;
 
+import com.github.pagehelper.PageHelper;
 import io.github.yubincloud.fairywiki.domain.Ebook;
 import io.github.yubincloud.fairywiki.domain.EbookExample;
 import io.github.yubincloud.fairywiki.dto.resp.EbookRespDto;
@@ -20,6 +21,7 @@ public class EbookService {
      * 查询数据库中的全部 ebook
      */
     public List<EbookRespDto> queryAll() {
+        PageHelper.startPage(1, 3);  // 对接下来遇到的第一个 SELECT 产生作用
         List<Ebook> ebookList = ebookMapper.selectByExample(null);
         return CopyUtil.copyList(ebookList, EbookRespDto.class);
     }
