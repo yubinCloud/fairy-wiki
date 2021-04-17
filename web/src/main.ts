@@ -9,6 +9,25 @@ import axios from 'axios';
 
 axios.defaults.baseURL = process.env.VUE_APP_SERVER;  // 在使用 axios 发送请求时全局的base域
 
+/**
+ * axios 拦截器
+ */
+axios.interceptors.request.use(function (reqConf) {
+    console.log('请求参数：', reqConf);
+    return reqConf;
+}, error => {
+    return Promise.reject(error);
+});
+
+axios.interceptors.response.use(function (resp) {
+    console.log('返回结果：', resp);
+    return resp;
+}, error => {
+    console.log('返回错误：', error);
+    return Promise.reject(error);
+})
+
+
 const app = createApp(App);
 app.use(store).use(router).use(Antd).mount('#app');
 
