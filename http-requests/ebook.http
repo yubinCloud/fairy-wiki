@@ -1,3 +1,13 @@
+POST http://localhost:8880/ebook/save
+Content-Type: application/json
+
+{
+  "cover": "12",
+  "description": "FastAPI framework, high performance, easy to learn, fast to code, ready for production",
+  "name": "fastapi 入门教程"
+}
+
+###
 GET http://localhost:8880/ebook/list
 Accept: application/json
 
@@ -16,3 +26,4 @@ Accept: application/json
 
 GET http://localhost:8880/ebook/list?pageNum=1&pageSize=3
 Accept: application/json
+

@@ -9,17 +9,22 @@ import io.github.yubincloud.fairywiki.dto.resp.EbookQueryRespDto;
 import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
 import io.github.yubincloud.fairywiki.mapper.EbookMapper;
 import io.github.yubincloud.fairywiki.utils.CopyUtil;
+import io.github.yubincloud.fairywiki.utils.SnowFlake;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @Service
 public class EbookService {
 
-    @Autowired
+    @Resource
     private EbookMapper ebookMapper;
+
+    @Resource
+    private SnowFlake snowFlake;
 
     /**
      * 查询数据库中的全部 ebook
@@ -56,6 +61,7 @@ public class EbookService {
     public void save(EbookSaveReqDto reqDto) {
         Ebook ebookRecord = CopyUtil.copy(reqDto, Ebook.class);
         if (ObjectUtils.isEmpty(ebookRecord.getId())) {  // 判断 id 是否为空
+            ebookRecord.setId(snowFlake.nextId());
             ebookMapper.insert(ebookRecord);
         } else {
             ebookMapper.updateByPrimaryKey(ebookRecord);
