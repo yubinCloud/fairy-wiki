@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class EbookReqDto extends PageReqDto {
+public class EbookQueryReqDto extends PageReqDto {
 
     private Long id;
 

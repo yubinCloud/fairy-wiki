@@ -48,7 +48,7 @@
         <a-input v-model:value="ebook.category2Id" />
       </a-form-item>
       <a-form-item label="描述">
-        <a-input v-model:value="ebook.desc" type="textarea" />
+        <a-input v-model:value="ebook.description" type="textarea" />
       </a-form-item>
     </a-form>
   </a-modal>
@@ -146,10 +146,17 @@ export default defineComponent({
     const modalLoading = ref(false);
     const handleModalOk = () => {
       modalLoading.value = true;
-      setTimeout(() => {
-        modalVisible.value = false;
-        modalLoading.value = false;
-      }, 2000);
+      axios.post("/ebook/save", ebook.value).then((response) => {
+        const respData = response.data;
+        if (respData.code == 0) {
+          modalVisible.value = false;
+          modalLoading.value = false;
+        }
+        handleQuery({
+          page: pagination.value.current,
+          size: pagination.value.pageSize,
+        });
+      })
     };
 
     /**

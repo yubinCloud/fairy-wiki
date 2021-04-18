@@ -1,9 +1,9 @@
-package io.github.yubincloud.fairywiki.dto.resp;
+package io.github.yubincloud.fairywiki.dto.req;
 
 import lombok.Data;
 
 @Data
-public class EbookRespDto {
+public class EbookSaveReqDto {
     private Long id;
 
     private String name;
