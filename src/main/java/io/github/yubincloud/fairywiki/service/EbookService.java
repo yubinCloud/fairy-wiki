@@ -10,7 +10,6 @@ import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
 import io.github.yubincloud.fairywiki.mapper.EbookMapper;
 import io.github.yubincloud.fairywiki.utils.CopyUtil;
 import io.github.yubincloud.fairywiki.utils.SnowFlake;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -61,10 +60,14 @@ public class EbookService {
     public void save(EbookSaveReqDto reqDto) {
         Ebook ebookRecord = CopyUtil.copy(reqDto, Ebook.class);
         if (ObjectUtils.isEmpty(ebookRecord.getId())) {  // 判断 id 是否为空
-            ebookRecord.setId(snowFlake.nextId());
-            ebookMapper.insert(ebookRecord);
+            // ebookRecord.setId(snowFlake.nextId());
+            ebookMapper.insertSelective(ebookRecord);
         } else {
             ebookMapper.updateByPrimaryKey(ebookRecord);
         }
+    }
+
+    public void deleteOneEbook(Long ebookId) {
+        ebookMapper.deleteByPrimaryKey(ebookId);
     }
 }

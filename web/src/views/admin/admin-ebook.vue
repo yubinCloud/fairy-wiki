@@ -24,9 +24,14 @@
             <a-button type="primary" @click="edit(record)">
               编辑
             </a-button>
-            <a-button type="danger">
-              删除
-            </a-button>
+            <a-popconfirm
+                title="确认删除？"
+                ok-text="Yes"
+                cancel-text="No"
+                @confirm="handleDeleteEbook(record.id)"
+            >
+              <a-button type="danger">删除</a-button>
+            </a-popconfirm>
           </a-space>
         </template>
       </a-table>
@@ -138,7 +143,7 @@ export default defineComponent({
      * 表格点击页码时触发
      */
     const handleTableChange = (pagination: any) => {
-      console.log("看看自带的分页参数都有啥：" + pagination);
+      console.log("看看自带的分页参数都有啥：", pagination);
       handleQuery({
         pageNum: pagination.current,
         pageSize: pagination.pageSize
@@ -180,6 +185,22 @@ export default defineComponent({
       ebook.value = {};
     }
 
+    /**
+     * 删除
+     */
+    const handleDeleteEbook = (ebookId: any) => {
+      console.log(ebookId);
+      axios.delete("/ebook/delete/" + ebookId).then((response) => {
+        const respData = response.data;
+        if (respData.code == 0) {
+          handleQuery({
+            page: pagination.value.current,
+            size: pagination.value.pageSize,
+          });
+        }
+      });
+    }
+
 
     onMounted(() => {
       handleQuery({
@@ -197,6 +218,7 @@ export default defineComponent({
 
       edit,
       add,
+      handleDeleteEbook,
 
       ebook,
       modalVisible,

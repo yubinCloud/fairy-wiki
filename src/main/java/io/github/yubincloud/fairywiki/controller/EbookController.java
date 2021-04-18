@@ -46,4 +46,10 @@ public class EbookController {
         ebookService.save(ebookSaveReqDto);
         return new RestfulModel<>(ErrorCode.SUCCESS, "", 0);
     }
+
+    @DeleteMapping("/delete/{ebookId}")
+    public RestfulModel<Integer> deleteEbook(@PathVariable Long ebookId) {
+        ebookService.deleteOneEbook(ebookId);
+        return new RestfulModel<>(ErrorCode.SUCCESS, "", 0);
+    }
 }
