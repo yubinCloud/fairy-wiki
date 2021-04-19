@@ -188,7 +188,7 @@ export default defineComponent({
     /**
      * 删除
      */
-    const handleDeleteEbook = (ebookId: any) => {
+    const handleDeleteEbook = (ebookId: string) => {
       console.log(ebookId);
       axios.delete("/ebook/delete/" + ebookId).then((response) => {
         const respData = response.data;

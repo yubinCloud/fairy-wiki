@@ -60,7 +60,7 @@ public class EbookService {
     public void save(EbookSaveReqDto reqDto) {
         Ebook ebookRecord = CopyUtil.copy(reqDto, Ebook.class);
         if (ObjectUtils.isEmpty(ebookRecord.getId())) {  // 判断 id 是否为空
-            // ebookRecord.setId(snowFlake.nextId());
+            ebookRecord.setId(snowFlake.nextId());
             ebookMapper.insertSelective(ebookRecord);
         } else {
             ebookMapper.updateByPrimaryKey(ebookRecord);
