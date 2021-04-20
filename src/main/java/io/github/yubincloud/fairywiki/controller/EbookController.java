@@ -43,7 +43,7 @@ public class EbookController {
      * 根据请求的参数保存一个 ebook，若id非空则为更新，否则为新增
      */
     @PostMapping("/save")
-    public RestfulModel<Integer> saveEbook(@RequestBody EbookSaveReqDto ebookSaveReqDto) {
+    public RestfulModel<Integer> saveEbook(@RequestBody @Valid EbookSaveReqDto ebookSaveReqDto) {
         ebookService.save(ebookSaveReqDto);
         return new RestfulModel<>(ErrorCode.SUCCESS, "", 0);
     }

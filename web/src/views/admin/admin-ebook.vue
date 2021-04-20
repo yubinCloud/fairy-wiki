@@ -75,7 +75,7 @@ export default defineComponent({
     const ebooks = ref();
     const pagination = ref({
       current: 1,
-      pageSize: 5000,
+      pageSize: 4,
       total: 0
     });
     const loading = ref(false);
@@ -164,9 +164,11 @@ export default defineComponent({
       modalLoading.value = true;
       axios.post("/ebook/save", ebook.value).then((response) => {
         const respData = response.data;
+        modalLoading.value = false;
         if (respData.code == 0) {
           modalVisible.value = false;
-          modalLoading.value = false;
+        } else {
+          message.error(respData.msg);
         }
         handleQuery({
           page: pagination.value.current,
