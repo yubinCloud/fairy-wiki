@@ -89,6 +89,7 @@
 import { defineComponent, onMounted, ref, UnwrapRef, reactive } from 'vue';
 import axios from 'axios';
 import { message } from 'ant-design-vue'
+import {Tool} from "@/util/tool";
 
 interface EbookQueryForm {
   name: string;
@@ -240,7 +241,7 @@ export default defineComponent({
      */
     const edit = (record: any) => {
       modalVisible.value = true;
-      ebook.value = record
+      ebook.value = Tool.copy(record);
     };
 
     /**

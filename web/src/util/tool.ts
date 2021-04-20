@@ -13,7 +13,7 @@ export class Tool {
   /**
    * 非空校验
    */
-  public static isNotEmpty (obj: any) {
+  public static isNotEmpty (obj: any): boolean {
     return !this.isEmpty(obj);
   }
 
