@@ -11,6 +11,7 @@ import io.github.yubincloud.fairywiki.service.EbookService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -24,7 +25,7 @@ public class EbookController {
      * 获取全部的电子书信息
      */
     @GetMapping("/list")
-    public RestfulModel<PageRespDto<EbookQueryRespDto>> getAllEbook(PageReqDto pageReqDto) {
+    public RestfulModel<PageRespDto<EbookQueryRespDto>> getAllEbook(@Valid PageReqDto pageReqDto) {
         PageRespDto<EbookQueryRespDto> bookList = ebookService.queryAll(pageReqDto.getPageNum(), pageReqDto.getPageSize());
         return new RestfulModel<>(ErrorCode.SUCCESS, "", bookList);
     }

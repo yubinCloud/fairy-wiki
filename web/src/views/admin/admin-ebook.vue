@@ -67,6 +67,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
 import axios from 'axios';
+import { message } from 'ant-design-vue'
 
 export default defineComponent({
   name: 'AdminEbook',
@@ -74,7 +75,7 @@ export default defineComponent({
     const ebooks = ref();
     const pagination = ref({
       current: 1,
-      pageSize: 4,
+      pageSize: 5000,
       total: 0
     });
     const loading = ref(false);
@@ -130,12 +131,17 @@ export default defineComponent({
       }).then((response) => {
         loading.value = false;
         const respData = response.data;
-        const pageData = respData.data;
-        ebooks.value = pageData.list;
 
-        // 重置分页按钮
-        pagination.value.current = queryParams.pageNum;
-        pagination.value.total = pageData.total;
+        if (respData.code == 0) {
+          const pageData = respData.data;
+          ebooks.value = pageData.list;
+
+          // 重置分页按钮
+          pagination.value.current = queryParams.pageNum;
+          pagination.value.total = pageData.total;
+        } else {
+          message.error(respData.msg);
+        }
       });
     };
 
