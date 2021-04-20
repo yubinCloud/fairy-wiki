@@ -148,44 +148,17 @@ export default defineComponent({
       }
     ];
 
-    /**
-     * 根据表单提交的数据进行查询
-     **/
-    const handleQueryFormSubmit = (ebookForm: EbookQueryForm) => {
-      loading.value = true;
-      axios.get("/ebook/query", {
-        params: {
-          name: ebookForm.name,
-          pageNum: 1,
-          pageSize: 4
-        }
-      }).then((response) => {
-        loading.value = false;
-        const respData = response.data;
-
-        if (respData.code == 0) {
-          const pageData = respData.data;
-          ebooks.value = pageData.list;
-
-          // 重置分页按钮
-          pagination.value.current = 1;
-          pagination.value.total = pageData.total;
-        } else {
-          message.error(respData.msg);
-        }
-      });
-    };
-
 
     /**
      * 数据查询
      **/
     const handleQuery = (queryParams: any) => {
       loading.value = true;
-      axios.get("/ebook/list", {
+      axios.get("/ebook/query", {
         params: {
           pageNum: queryParams.pageNum,
-          pageSize: queryParams.pageSize
+          pageSize: queryParams.pageSize,
+          name: queryParams.name,
         }
       }).then((response) => {
         loading.value = false;
@@ -201,6 +174,17 @@ export default defineComponent({
         } else {
           message.error(respData.msg);
         }
+      });
+    };
+
+    /**
+     * 根据表单提交的数据进行查询
+     **/
+    const handleQueryFormSubmit = (ebookForm: EbookQueryForm) => {
+      handleQuery({
+        pageNum: 1,
+        pageSize: 4,
+        name: ebookForm.name,
       });
     };
 

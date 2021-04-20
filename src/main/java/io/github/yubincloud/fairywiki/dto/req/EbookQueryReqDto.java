@@ -9,4 +9,6 @@ import lombok.EqualsAndHashCode;
 public class EbookQueryReqDto extends PageReqDto {
 
     private String name;
+
+    private Long CategoryId2;
 }

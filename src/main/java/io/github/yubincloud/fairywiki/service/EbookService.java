@@ -11,6 +11,8 @@ import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
 import io.github.yubincloud.fairywiki.mapper.EbookMapper;
 import io.github.yubincloud.fairywiki.utils.CopyUtil;
 import io.github.yubincloud.fairywiki.utils.SnowFlake;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -20,44 +22,41 @@ import java.util.List;
 @Service
 public class EbookService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(EbookService.class);
+
     @Resource
     private EbookMapper ebookMapper;
 
     @Resource
     private SnowFlake snowFlake;
 
-    /**
-     * 查询数据库中的全部 ebook
-     */
-    public PageRespDto<EbookQueryRespDto> queryAll(int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum, pageSize);  // 对接下来遇到的第一个 SELECT 产生作用
-        List<Ebook> ebookList = ebookMapper.selectByExample(null);
-        PageInfo<Ebook> pageInfo = new PageInfo<>(ebookList);
-
-        List<EbookQueryRespDto> ebookQueryRespDtoList = CopyUtil.copyList(ebookList, EbookQueryRespDto.class);
-        PageRespDto<EbookQueryRespDto> pageRespDto = new PageRespDto<>();
-        pageRespDto.setTotal(pageInfo.getTotal());
-        pageRespDto.setList(ebookQueryRespDtoList);
-        return pageRespDto;
-    }
 
     /**
-     * 根据 ebook 的 name 进行模糊查询
+     * 根据查询条件对数据库中的 ebook 进行查询并返回查询到的 ebook
      */
-    public PageRespDto<EbookQueryRespDto> fuzzyQueryByName(EbookQueryReqDto ebookQueryReqDto) {
-        // 对数据库进行模糊查询
+    public PageRespDto<EbookQueryRespDto> queryEbooks(EbookQueryReqDto reqDto) {
         EbookExample ebookExample = new EbookExample();
         EbookExample.Criteria criteria = ebookExample.createCriteria();
-        criteria.andNameLike("%" + ebookQueryReqDto.getName() + "%");
-        PageHelper.startPage(ebookQueryReqDto.getPageNum(), ebookQueryReqDto.getPageSize());  // 对接下来遇到的第一个 SELECT 产生作用
+        if (!ObjectUtils.isEmpty(reqDto.getName())) {
+            criteria.andNameLike("%" + reqDto.getName() + "%");
+        }
+        if (!ObjectUtils.isEmpty(reqDto.getCategoryId2())) {
+            criteria.andCategory2IdEqualTo(reqDto.getCategoryId2());
+        }
+        PageHelper.startPage(reqDto.getPageNum(), reqDto.getPageSize());
         List<Ebook> ebookList = ebookMapper.selectByExample(ebookExample);
-        // 将 ebookList 拷贝至 dto 对象列表并返回
-        PageInfo<Ebook> pageInfo = new PageInfo<>(ebookList);
 
-        List<EbookQueryRespDto> ebookQueryRespDtoList = CopyUtil.copyList(ebookList, EbookQueryRespDto.class);
+        PageInfo<Ebook> pageInfo = new PageInfo<>(ebookList);
+        LOG.info("总行数：{}", pageInfo.getTotal());
+        LOG.info("总页数：{}", pageInfo.getPages());
+
+        // 列表复制
+        List<EbookQueryRespDto> list = CopyUtil.copyList(ebookList, EbookQueryRespDto.class);
+
         PageRespDto<EbookQueryRespDto> pageRespDto = new PageRespDto<>();
         pageRespDto.setTotal(pageInfo.getTotal());
-        pageRespDto.setList(ebookQueryRespDtoList);
+        pageRespDto.setList(list);
+
         return pageRespDto;
     }
 
