@@ -4,9 +4,30 @@
         :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
     >
       <p>
-        <a-button type="primary" @click="add()" size="large">
-          新增
-        </a-button>
+        <a-form
+            layout="inline"
+            :model="ebookQueryForm"
+            @finish="handleQueryFormSubmit(ebookQueryForm)"
+        >
+          <a-form-item>
+            <a-input v-model:value="ebookQueryForm.name" placeholder="ebook name">
+              <template #prefix><EyeOutlined style="color: rgba(0, 0, 0, 0.25)" /></template>
+            </a-input>
+          </a-form-item>
+          <a-form-item>
+            <a-button
+                type="primary"
+                html-type="submit"
+                size="large"
+                :disabled="ebookQueryForm.name === ''"
+            >
+              查询
+            </a-button>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="add()" size="large">新增</a-button>
+          </a-form-item>
+        </a-form>
       </p>
       <a-table
           :columns="columns"
@@ -65,13 +86,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onMounted, ref, UnwrapRef, reactive } from 'vue';
 import axios from 'axios';
 import { message } from 'ant-design-vue'
+
+interface EbookQueryForm {
+  name: string;
+}
 
 export default defineComponent({
   name: 'AdminEbook',
   setup() {
+    const ebookQueryForm: UnwrapRef<EbookQueryForm> = reactive({
+      name: ''
+    });
+
     const ebooks = ref();
     const pagination = ref({
       current: 1,
@@ -117,6 +146,35 @@ export default defineComponent({
         slots: { customRender: 'action' }
       }
     ];
+
+    /**
+     * 根据表单提交的数据进行查询
+     **/
+    const handleQueryFormSubmit = (ebookForm: EbookQueryForm) => {
+      loading.value = true;
+      axios.get("/ebook/query", {
+        params: {
+          name: ebookForm.name,
+          pageNum: 1,
+          pageSize: 4
+        }
+      }).then((response) => {
+        loading.value = false;
+        const respData = response.data;
+
+        if (respData.code == 0) {
+          const pageData = respData.data;
+          ebooks.value = pageData.list;
+
+          // 重置分页按钮
+          pagination.value.current = 1;
+          pagination.value.total = pageData.total;
+        } else {
+          message.error(respData.msg);
+        }
+      });
+    };
+
 
     /**
      * 数据查询
@@ -218,6 +276,10 @@ export default defineComponent({
     });
 
     return {
+      ebookQueryForm,
+      labelCol: { span: 4 },
+      wrapperCol: { span: 14 },
+
       ebooks,
       pagination,
       columns,
@@ -227,6 +289,7 @@ export default defineComponent({
       edit,
       add,
       handleDeleteEbook,
+      handleQueryFormSubmit,
 
       ebook,
       modalVisible,

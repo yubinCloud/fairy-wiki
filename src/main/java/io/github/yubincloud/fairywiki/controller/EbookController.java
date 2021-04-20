@@ -30,12 +30,9 @@ public class EbookController {
         return new RestfulModel<>(ErrorCode.SUCCESS, "", bookList);
     }
 
-    /**
-     * 根据书名进行电子书的模糊查询接口
-     */
-    @GetMapping("/list2")
-    public RestfulModel<List<EbookQueryRespDto>> list(EbookQueryReqDto ebookQueryReqDto) {
-        List<EbookQueryRespDto> bookList = ebookService.fuzzyQueryByName(ebookQueryReqDto.getName());
+    @GetMapping("/query")
+    public RestfulModel<PageRespDto<EbookQueryRespDto>> queryEbooks(@Valid EbookQueryReqDto ebookQueryReqDto) {
+        PageRespDto<EbookQueryRespDto> bookList = ebookService.fuzzyQueryByName(ebookQueryReqDto);
         return new RestfulModel<>(ErrorCode.SUCCESS, "", bookList);
     }
 

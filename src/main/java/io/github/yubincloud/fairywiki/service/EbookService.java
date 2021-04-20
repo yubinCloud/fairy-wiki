@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.github.yubincloud.fairywiki.domain.Ebook;
 import io.github.yubincloud.fairywiki.domain.EbookExample;
+import io.github.yubincloud.fairywiki.dto.req.EbookQueryReqDto;
 import io.github.yubincloud.fairywiki.dto.req.EbookSaveReqDto;
 import io.github.yubincloud.fairywiki.dto.resp.EbookQueryRespDto;
 import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
@@ -42,16 +43,22 @@ public class EbookService {
 
     /**
      * 根据 ebook 的 name 进行模糊查询
-     * @param name ebook的书名
      */
-    public List<EbookQueryRespDto> fuzzyQueryByName(String name) {
+    public PageRespDto<EbookQueryRespDto> fuzzyQueryByName(EbookQueryReqDto ebookQueryReqDto) {
         // 对数据库进行模糊查询
         EbookExample ebookExample = new EbookExample();
         EbookExample.Criteria criteria = ebookExample.createCriteria();
-        criteria.andNameLike("%" + name + "%");
+        criteria.andNameLike("%" + ebookQueryReqDto.getName() + "%");
+        PageHelper.startPage(ebookQueryReqDto.getPageNum(), ebookQueryReqDto.getPageSize());  // 对接下来遇到的第一个 SELECT 产生作用
         List<Ebook> ebookList = ebookMapper.selectByExample(ebookExample);
         // 将 ebookList 拷贝至 dto 对象列表并返回
-        return CopyUtil.copyList(ebookList, EbookQueryRespDto.class);
+        PageInfo<Ebook> pageInfo = new PageInfo<>(ebookList);
+
+        List<EbookQueryRespDto> ebookQueryRespDtoList = CopyUtil.copyList(ebookList, EbookQueryRespDto.class);
+        PageRespDto<EbookQueryRespDto> pageRespDto = new PageRespDto<>();
+        pageRespDto.setTotal(pageInfo.getTotal());
+        pageRespDto.setList(ebookQueryRespDtoList);
+        return pageRespDto;
     }
 
     /**

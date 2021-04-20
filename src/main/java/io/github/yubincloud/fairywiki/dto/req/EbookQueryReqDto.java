@@ -8,7 +8,5 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class EbookQueryReqDto extends PageReqDto {
 
-    private Long id;
-
     private String name;
 }
