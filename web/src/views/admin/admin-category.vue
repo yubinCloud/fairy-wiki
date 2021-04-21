@@ -7,19 +7,14 @@
         <a-form
             layout="inline"
             :model="categoryQueryForm"
-            @finish="handleQueryFormSubmit(categoryQueryForm)"
+            @finish="handleQueryFormSubmit"
         >
-          <a-form-item>
-            <a-input v-model:value="categoryQueryForm.name" placeholder="category name">
-              <template #prefix><EyeOutlined style="color: rgba(0, 0, 0, 0.25)" /></template>
-            </a-input>
-          </a-form-item>
+
           <a-form-item>
             <a-button
                 type="primary"
                 html-type="submit"
                 size="large"
-                :disabled="categoryQueryForm.name === ''"
             >
               查询
             </a-button>
@@ -33,9 +28,8 @@
           :columns="columns"
           :row-key="record => record.id"
           :data-source="categorys"
-          :pagination="pagination"
+          :pagination="false"
           :loading="loading"
-          @change="handleTableChange"
       >
         <template #cover="{ text: cover }">
           <img v-if="cover" :src="cover" alt="avatar" />
@@ -97,11 +91,6 @@ export default defineComponent({
     });
 
     const categorys = ref();
-    const pagination = ref({
-      current: 1,
-      pageSize: 10,
-      total: 0
-    });
     const loading = ref(false);
 
     const columns = [
@@ -129,25 +118,15 @@ export default defineComponent({
     /**
      * 数据查询
      **/
-    const handleQuery = (queryParams: any) => {
+    const handleQuery = () => {
       loading.value = true;
-      axios.get("/category/query", {
-        params: {
-          pageNum: queryParams.pageNum,
-          pageSize: queryParams.pageSize,
-          name: queryParams.name,
-        }
-      }).then((response) => {
+      axios.get("/category/all").then((response) => {
         loading.value = false;
         const respData = response.data;
 
         if (respData.code == 0) {
-          const pageData = respData.data;
-          categorys.value = pageData.list;
+          categorys.value = respData.data;
 
-          // 重置分页按钮
-          pagination.value.current = queryParams.pageNum;
-          pagination.value.total = pageData.total;
         } else {
           message.error(respData.msg);
         }
@@ -157,24 +136,10 @@ export default defineComponent({
     /**
      * 根据表单提交的数据进行查询
      **/
-    const handleQueryFormSubmit = (categoryForm: CategoryQueryForm) => {
-      handleQuery({
-        pageNum: 1,
-        pageSize: 4,
-        name: categoryForm.name,
-      });
+    const handleQueryFormSubmit = () => {
+      handleQuery();
     };
 
-    /**
-     * 表格点击页码时触发
-     */
-    const handleTableChange = (pagination: any) => {
-      console.log("看看自带的分页参数都有啥：", pagination);
-      handleQuery({
-        pageNum: pagination.current,
-        pageSize: pagination.pageSize
-      });
-    };
 
     // -------- 表单 ---------
     const category = ref({});
@@ -190,10 +155,7 @@ export default defineComponent({
         } else {
           message.error(respData.msg);
         }
-        handleQuery({
-          page: pagination.value.current,
-          size: pagination.value.pageSize,
-        });
+        handleQuery();
       })
     };
 
@@ -221,20 +183,14 @@ export default defineComponent({
       axios.delete("/category/delete/" + categoryId).then((response) => {
         const respData = response.data;
         if (respData.code == 0) {
-          handleQuery({
-            page: pagination.value.current,
-            size: pagination.value.pageSize,
-          });
+          handleQuery();
         }
       });
     }
 
 
     onMounted(() => {
-      handleQuery({
-        pageNum: 1,
-        pageSize: pagination.value.pageSize,
-      });
+      handleQuery();
     });
 
     return {
@@ -243,10 +199,8 @@ export default defineComponent({
       wrapperCol: { span: 14 },
 
       categorys,
-      pagination,
       columns,
       loading,
-      handleTableChange,
 
       edit,
       add,

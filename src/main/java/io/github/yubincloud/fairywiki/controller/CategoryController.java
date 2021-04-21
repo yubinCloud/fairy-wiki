@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/category")
@@ -18,6 +19,15 @@ public class CategoryController {
 
     @Resource
     private CategoryService categoryService;
+
+    /**
+     * 获取全部 Category 的接口
+     */
+    @GetMapping("/all")
+    public RestfulModel<List<CategoryQueryRespDto>> allCategories() {
+        List<CategoryQueryRespDto> categoryList = categoryService.fetchAllCategories();
+        return new RestfulModel<>(ErrorCode.SUCCESS, "", categoryList);
+    }
 
     /**
      * 对 category 进行查询的接口

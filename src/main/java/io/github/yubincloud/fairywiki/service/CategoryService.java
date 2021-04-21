@@ -30,6 +30,16 @@ public class CategoryService {
     @Resource
     private SnowFlake snowFlake;
 
+    /**
+     * 获取全部 Category
+     */
+    public List<CategoryQueryRespDto> fetchAllCategories() {
+        CategoryExample categoryExample = new CategoryExample();
+        categoryExample.setOrderByClause("sort asc");
+        List<Category> categoryList = categoryMapper.selectByExample(categoryExample);
+        return CopyUtil.copyList(categoryList, CategoryQueryRespDto.class);
+    }
+
 
     /**
      * 根据查询条件对数据库中的 category 进行查询并返回查询到的 category
