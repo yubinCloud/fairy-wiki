@@ -72,11 +72,11 @@
       <a-form-item label="名称">
         <a-input v-model:value="ebook.name" />
       </a-form-item>
-      <a-form-item label="分类一">
-        <a-input v-model:value="ebook.category1Id" />
-      </a-form-item>
-      <a-form-item label="分类二">
-        <a-input v-model:value="ebook.category2Id" />
+      <a-form-item label="分类">
+        <a-cascader v-model:value="categoryIds"
+                    :field-names="{ label: 'name', value: 'id', children: 'children' }"
+                    :options="level1"
+                    placeholder="Please select" />
       </a-form-item>
       <a-form-item label="描述">
         <a-input v-model:value="ebook.description" type="textarea" />
@@ -90,6 +90,18 @@ import { defineComponent, onMounted, ref, UnwrapRef, reactive } from 'vue';
 import axios from 'axios';
 import { message } from 'ant-design-vue'
 import {Tool} from "@/util/tool";
+
+interface Ebook {
+  id: string;
+  name: string;
+  category1Id: string;
+  category2Id: string;
+  description: string;
+  cover: string;
+  docCount: number;
+  viewCount: number;
+  voteCount: number;
+}
 
 interface EbookQueryForm {
   name: string;
@@ -152,7 +164,7 @@ export default defineComponent({
     /**
      * 数据查询
      **/
-    const handleQuery = (queryParams: any) => {
+    const handleQueryEbooks = (queryParams: any) => {
       loading.value = true;
       axios.get("/ebook/query", {
         params: {
@@ -181,7 +193,7 @@ export default defineComponent({
      * 根据表单提交的数据进行查询
      **/
     const handleQueryFormSubmit = (ebookForm: EbookQueryForm) => {
-      handleQuery({
+      handleQueryEbooks({
         pageNum: 1,
         pageSize: 4,
         name: ebookForm.name,
@@ -193,18 +205,33 @@ export default defineComponent({
      */
     const handleTableChange = (pagination: any) => {
       console.log("看看自带的分页参数都有啥：", pagination);
-      handleQuery({
+      handleQueryEbooks({
         pageNum: pagination.current,
         pageSize: pagination.pageSize
       });
     };
 
     // -------- 表单 ---------
-    const ebook = ref({});
+    const categoryIds = ref<string[]>([]);
+
+    const emptyEbook = {
+      id: '',
+      name: '',
+      category1Id: '',
+      category2Id: '',
+      description: '',
+      cover: '',
+      docCount: 0,
+      viewCount: 0,
+      voteCount: 0
+    };
+    const ebook = ref<Ebook>(Tool.copy(emptyEbook));
     const modalVisible = ref(false);
     const modalLoading = ref(false);
     const handleModalOk = () => {
       modalLoading.value = true;
+      ebook.value.category1Id = categoryIds.value[0];
+      ebook.value.category2Id = categoryIds.value[1];
       axios.post("/ebook/save", ebook.value).then((response) => {
         const respData = response.data;
         modalLoading.value = false;
@@ -213,7 +240,7 @@ export default defineComponent({
         } else {
           message.error(respData.msg);
         }
-        handleQuery({
+        handleQueryEbooks({
           page: pagination.value.current,
           size: pagination.value.pageSize,
         });
@@ -226,6 +253,7 @@ export default defineComponent({
     const edit = (record: any) => {
       modalVisible.value = true;
       ebook.value = Tool.copy(record);
+      categoryIds.value = [ebook.value.category1Id, ebook.value.category2Id];
     };
 
     /**
@@ -233,7 +261,7 @@ export default defineComponent({
      */
     const add = () => {
       modalVisible.value = true;
-      ebook.value = {};
+      ebook.value = Tool.copy(emptyEbook);
     }
 
     /**
@@ -244,7 +272,7 @@ export default defineComponent({
       axios.delete("/ebook/delete/" + ebookId).then((response) => {
         const respData = response.data;
         if (respData.code == 0) {
-          handleQuery({
+          handleQueryEbooks({
             page: pagination.value.current,
             size: pagination.value.pageSize,
           });
@@ -252,9 +280,33 @@ export default defineComponent({
       });
     }
 
+    const level1 =  ref();
+    /**
+     * 查询所有分类
+     **/
+    const handleQueryCategory = () => {
+      loading.value = true;
+      axios.get("/category/all").then((response) => {
+        loading.value = false;
+        const respData = response.data;
+
+        if (respData.code == 0) {
+          const categorys = respData.data;
+          console.log("原始数组：", categorys);
+
+          level1.value = [];
+          level1.value = Tool.array2Tree(categorys, 0);
+          console.log("树形结构：", level1);
+
+        } else {
+          message.error(respData.msg);
+        }
+      });
+    };
 
     onMounted(() => {
-      handleQuery({
+      handleQueryCategory();
+      handleQueryEbooks({
         pageNum: 1,
         pageSize: pagination.value.pageSize,
       });
@@ -269,6 +321,8 @@ export default defineComponent({
       pagination,
       columns,
       loading,
+      categoryIds,
+      level1,
       handleTableChange,
 
       edit,
