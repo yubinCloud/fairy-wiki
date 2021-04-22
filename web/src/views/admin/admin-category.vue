@@ -93,17 +93,8 @@ import { defineComponent, onMounted, ref, UnwrapRef, reactive } from 'vue';
 import axios from 'axios';
 import { message } from 'ant-design-vue'
 import { Tool } from "@/util/tool";
+import { Category, CategoryQueryForm } from "@/models";
 
-interface CategoryQueryForm {
-  name: string;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  parent: string;
-  sort: number;
-}
 
 export default defineComponent({
   name: 'AdminCategory',

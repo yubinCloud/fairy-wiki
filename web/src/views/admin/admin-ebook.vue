@@ -89,23 +89,8 @@
 import { defineComponent, onMounted, ref, UnwrapRef, reactive } from 'vue';
 import axios from 'axios';
 import { message } from 'ant-design-vue'
-import {Tool} from "@/util/tool";
-
-interface Ebook {
-  id: string;
-  name: string;
-  category1Id: string;
-  category2Id: string;
-  description: string;
-  cover: string;
-  docCount: number;
-  viewCount: number;
-  voteCount: number;
-}
-
-interface EbookQueryForm {
-  name: string;
-}
+import { Tool } from "@/util/tool";
+import { Ebook, EbookQueryForm } from "@/models"
 
 export default defineComponent({
   name: 'AdminEbook',
