@@ -5,23 +5,21 @@
           mode="inline"
           :style="{ height: '100%', borderRight: 0 }"
           @click="handleClick"
-          :openKeys="openKeys"
       >
         <a-menu-item key="welcome">
-          <MailOutlined />
-          <span>欢迎</span>
+          <router-link :to="'/'">
+            <MailOutlined />
+            <span>欢迎</span>
+          </router-link>
         </a-menu-item>
-        <a-sub-menu v-for="item in level1" :key="item.id" :disabled="true">
+        <a-sub-menu v-for="item in level1" :key="item.id">
           <template v-slot:title>
-            <span><user-outlined />{{item.name}}</span>
+            <span><user-outlined />{{ item.name }}</span>
           </template>
           <a-menu-item v-for="child in item.children" :key="child.id">
-            <MailOutlined /><span>{{child.name}}</span>
+            <MailOutlined /><span>{{ child.name }}</span>
           </a-menu-item>
         </a-sub-menu>
-        <a-menu-item key="tip" :disabled="true">
-          <span>以上菜单在分类管理配置</span>
-        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout-content
@@ -66,18 +64,10 @@
 import {defineComponent, onMounted, ref} from 'vue';
 import axios from 'axios';
 import { StarOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons-vue';
+import {Tool} from "@/util/tool";
+import {message} from "_ant-design-vue@2.0.0-rc.3@ant-design-vue";
+import {Category} from "@/models";
 
-// for (let i = 0; i < 23; i++) {
-//   listData.push({
-//     href: 'https://www.antdv.com/',
-//     title: `ant design vue part ${i}`,
-//     avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
-//     description:
-//         'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-//     content:
-//         'We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.',
-//   });
-// }
 
 export default defineComponent({
   name: 'Home',
@@ -89,16 +79,8 @@ export default defineComponent({
   setup() {
     console.log("setup");
     let listData = ref();
-
-    onMounted(() => {
-      console.log("onMounted");
-      axios.get("/ebook/query").then((response) => {
-        console.log(response);
-        const respData = response.data;
-        const pageData = respData.data;
-        listData.value = pageData.list;
-      })
-    });
+    let categories: Category[];
+    let level1 = ref();
 
     const pagination = {
       onChange: (page: number) => {
@@ -113,10 +95,52 @@ export default defineComponent({
       { type: 'MessageOutlined', text: '2' },
     ];
 
+    /**
+     * 查询所有分类
+     **/
+    const handleQueryCategory = () => {
+      axios.get("/category/all").then((response) => {
+        const respData = response.data;
+
+        if (respData.code == 0) {
+          categories = respData.data;
+          console.log("原始数组：", categories);
+
+          level1.value = [];
+          level1.value = Tool.array2Tree(categories, 0);
+          console.log("树形结构：", level1);
+
+        } else {
+          message.error(respData.msg);
+        }
+      });
+    };
+
+    const handleClick = () => {
+      console.log("menu click")
+    };
+
+    onMounted(() => {
+
+      handleQueryCategory()
+      console.log("onMounted");
+      axios.get("/ebook/query").then((response) => {
+        console.log(response);
+        const respData = response.data;
+        const pageData = respData.data;
+        listData.value = pageData.list;
+      })
+    });
+
+
     return {
       listData,
       pagination,
       actions,
+      level1,
+
+      handleQueryCategory,
+      handleClick,
     }
   }
 });
