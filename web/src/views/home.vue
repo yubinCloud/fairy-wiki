@@ -92,7 +92,7 @@ export default defineComponent({
 
     onMounted(() => {
       console.log("onMounted");
-      axios.get("/ebook/list").then((response) => {
+      axios.get("/ebook/query").then((response) => {
         console.log(response);
         const respData = response.data;
         const pageData = respData.data;
