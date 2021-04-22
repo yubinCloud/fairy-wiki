@@ -103,7 +103,7 @@ export default defineComponent({
       name: ''
     });
 
-    const categorys = ref();
+    const categorys = ref<Category[]>([]);
     const loading = ref(false);
 
     const columns = [
