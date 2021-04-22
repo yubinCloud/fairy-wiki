@@ -40,6 +40,9 @@
         <template #cover="{ text: cover }">
           <img v-if="cover" :src="cover" alt="avatar" />
         </template>
+        <template v-slot:category="{ text, record }">
+          <span>{{ getCategoryName(record.category1Id) }} / {{ getCategoryName(record.category2Id) }}</span>
+        </template>
         <template v-slot:action="{ text, record }">
           <a-space size="small">
             <a-button type="primary" @click="edit(record)">
@@ -90,7 +93,7 @@ import { defineComponent, onMounted, ref, UnwrapRef, reactive } from 'vue';
 import axios from 'axios';
 import { message } from 'ant-design-vue'
 import { Tool } from "@/util/tool";
-import { Ebook, EbookQueryForm } from "@/models"
+import {Category, Ebook, EbookQueryForm} from "@/models"
 
 export default defineComponent({
   name: 'AdminEbook',
@@ -118,13 +121,8 @@ export default defineComponent({
         dataIndex: 'name'
       },
       {
-        title: '分类一',
-        key: 'category1Id',
-        dataIndex: 'category1Id'
-      },
-      {
-        title: '分类二',
-        dataIndex: 'category2Id'
+        title: '分类',
+        slots: { customRender: 'category' }
       },
       {
         title: '文档数',
@@ -266,6 +264,7 @@ export default defineComponent({
     }
 
     const level1 =  ref();
+    let categories: Category[];
     /**
      * 查询所有分类
      **/
@@ -276,17 +275,27 @@ export default defineComponent({
         const respData = response.data;
 
         if (respData.code == 0) {
-          const categorys = respData.data;
-          console.log("原始数组：", categorys);
+          categories = respData.data;
+          console.log("原始数组：", categories);
 
           level1.value = [];
-          level1.value = Tool.array2Tree(categorys, 0);
+          level1.value = Tool.array2Tree(categories, 0);
           console.log("树形结构：", level1);
 
         } else {
           message.error(respData.msg);
         }
       });
+    };
+
+    const getCategoryName = (cid: string) => {
+      let result = "";
+      categories.forEach((item: Category) => {
+        if (item.id === cid) {
+          result = item.name;
+        }
+      });
+      return result;
     };
 
     onMounted(() => {
@@ -314,6 +323,7 @@ export default defineComponent({
       add,
       handleDeleteEbook,
       handleQueryFormSubmit,
+      getCategoryName,
 
       ebook,
       modalVisible,
