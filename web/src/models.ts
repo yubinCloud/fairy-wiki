@@ -43,7 +43,7 @@ export interface CategoryQueryForm {
  */
 export interface Doc {
     id: string;
-    ebookId: string;
+    ebookId: string|null;
     parent: string;
     name: string;
     sort: number;
