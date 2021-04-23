@@ -7,10 +7,8 @@
           @click="handleClick"
       >
         <a-menu-item key="welcome">
-          <router-link :to="'/'">
-            <MailOutlined />
-            <span>欢迎</span>
-          </router-link>
+          <MailOutlined />
+          <span>欢迎</span>
         </a-menu-item>
         <a-sub-menu v-for="item in level1" :key="item.id">
           <template v-slot:title>
@@ -26,23 +24,15 @@
         :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
     >
       <div class="welcome" v-show="isShowWelcome">
-        <the-welcome></the-welcome>
+        <h1>欢迎进入 Fairy Wiki</h1>
       </div>
       <a-list v-show="!isShowWelcome" item-layout="vertical" size="large" :grid="{ gutter: 20, column: 3 }" :data-source="listData">
         <template #renderItem="{ item }">
           <a-list-item key="item.name">
             <template #actions>
-              <span>
-                <component v-bind:is="'FileOutlined'" style="margin-right: 8px" />
-                {{ item.docCount }}
-              </span>
-              <span>
-                <component v-bind:is="'UserOutlined'" style="margin-right: 8px" />
-                {{ item.viewCount }}
-              </span>
-              <span>
-                <component v-bind:is="'LikeOutlined'" style="margin-right: 8px" />
-                {{ item.voteCount }}
+              <span v-for="{ type, text } in actions" :key="type">
+                <component v-bind:is="type" style="margin-right: 8px" />
+                {{ text }}
               </span>
             </template>
             <a-list-item-meta :description="item.description">
@@ -81,6 +71,7 @@ export default defineComponent({
     let listData = ref();
     let categories: Category[];
     let level1 = ref();
+    let isShowWelcome = ref(true);
 
     const pagination = {
       onChange: (page: number) => {
@@ -116,8 +107,8 @@ export default defineComponent({
       });
     };
 
-    const handleClick = () => {
-      console.log("menu click")
+    const handleClick = (value: any) => {
+      isShowWelcome.value = value.key === 'welcome';
     };
 
     onMounted(() => {
@@ -138,6 +129,7 @@ export default defineComponent({
       pagination,
       actions,
       level1,
+      isShowWelcome,
 
       handleQueryCategory,
       handleClick,
