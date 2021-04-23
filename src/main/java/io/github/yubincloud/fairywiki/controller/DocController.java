@@ -1,5 +1,6 @@
 package io.github.yubincloud.fairywiki.controller;
 
+import io.github.yubincloud.fairywiki.dto.req.DocDeleteReqDto;
 import io.github.yubincloud.fairywiki.dto.req.DocQueryReqDto;
 import io.github.yubincloud.fairywiki.dto.req.DocSaveReqDto;
 import io.github.yubincloud.fairywiki.dto.resp.DocQueryRespDto;
@@ -49,9 +50,9 @@ public class DocController {
         return new RestfulModel<>(ErrorCode.SUCCESS, "", 0);
     }
 
-    @DeleteMapping("/delete/{docId}")
-    public RestfulModel<Integer> deleteDoc(@PathVariable Long docId) {
-        docService.deleteOneDoc(docId);
+    @DeleteMapping("/delete")
+    public RestfulModel<Integer> deleteDoc(@RequestBody @Valid DocDeleteReqDto docDeleteReqDto) {
+        docService.deleteDocs(docDeleteReqDto.getIds());
         return new RestfulModel<>(ErrorCode.SUCCESS, "", 0);
     }
 }

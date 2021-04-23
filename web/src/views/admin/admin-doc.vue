@@ -251,12 +251,50 @@ export default defineComponent({
       treeSelectData.value.unshift({id: 0, name: '无'});
     }
 
+    let idListToDelete: Array<string> = [];
     /**
-     * 删除
+     * 查找整根树枝
+     */
+    const getDeleteIds = (treeSelectData: any, id: any) => {
+      // 遍历数组，即遍历某一层节点
+      idListToDelete = []
+      for (let i = 0; i < treeSelectData.length; i++) {
+        const node = treeSelectData[i];
+        if (node.id === id) {
+          // 如果当前节点就是目标节点
+          console.log("delete", node);
+          // 将目标ID放入结果集ids
+          // node.disabled = true;
+          idListToDelete.push(id);
+
+          // 遍历所有子节点
+          const children = node.children;
+          if (Tool.isNotEmpty(children)) {
+            for (let j = 0; j < children.length; j++) {
+              getDeleteIds(children, children[j].id)
+            }
+          }
+        } else {
+          // 如果当前节点不是目标节点，则到其子节点再找找看。
+          const children = node.children;
+          if (Tool.isNotEmpty(children)) {
+            getDeleteIds(children, id);
+          }
+        }
+      }
+    };
+
+    /**
+     * 删除用户选中的一个文档以及其所有子文档
+     * @param docId 用户选中所要删除的文档的 id
      */
     const handleDeleteDoc = (docId: string) => {
-      console.log(docId);
-      axios.delete("/doc/delete/" + docId).then((response) => {
+      getDeleteIds(level1.value, docId);
+      axios.delete("/doc/delete", {
+        data: {
+          ids: idListToDelete
+        }
+      }).then((response) => {
         const respData = response.data;
         if (respData.code == 0) {
           handleQuery();

@@ -77,7 +77,14 @@ public class DocService {
         }
     }
 
-    public void deleteOneDoc(Long docId) {
-        docMapper.deleteByPrimaryKey(docId);
+    /**
+     * 根据给定的文档 id 列表删除所有的文档
+     * @param idList 由所要删除的文档 id 组成的列表
+     */
+    public void deleteDocs(List<Long> idList) {
+        DocExample docExample = new DocExample();
+        DocExample.Criteria criteria = docExample.createCriteria();
+        criteria.andIdIn(idList);
+        docMapper.deleteByExample(docExample);
     }
 }
