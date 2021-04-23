@@ -36,3 +36,24 @@ export interface Category {
 export interface CategoryQueryForm {
     name: string;
 }
+
+
+/**
+ * 文档类
+ */
+export interface Doc {
+    id: string;
+    ebookId: string;
+    parent: string;
+    name: string;
+    sort: number;
+    viewCount: number;
+    voteCount: number;
+}
+
+/**
+ * 文档的查询类
+ */
+export interface DocQueryForm {
+    name: string;
+}
