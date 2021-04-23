@@ -83,12 +83,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, UnwrapRef, reactive } from 'vue';
+import { defineComponent, onMounted, ref, UnwrapRef, reactive, createVNode } from 'vue';
 import axios from 'axios';
-import { message } from 'ant-design-vue'
+import { message, Modal } from 'ant-design-vue';
+import ExclamationCircleOutlined from "@ant-design/icons-vue/ExclamationCircleOutlined";
 import { Tool } from "@/util/tool";
 import { Doc, DocQueryForm } from "@/models";
 import {useRoute} from "vue-router";
+
 
 
 export default defineComponent({
@@ -251,13 +253,13 @@ export default defineComponent({
       treeSelectData.value.unshift({id: 0, name: '无'});
     }
 
-    let idListToDelete: Array<string> = [];
+    let docIdListToDelete: Array<string> = [];
+    let docNameListToDelete: Array<string> = [];
     /**
      * 查找整根树枝
      */
     const getDeleteIds = (treeSelectData: any, id: any) => {
       // 遍历数组，即遍历某一层节点
-      idListToDelete = []
       for (let i = 0; i < treeSelectData.length; i++) {
         const node = treeSelectData[i];
         if (node.id === id) {
@@ -265,8 +267,8 @@ export default defineComponent({
           console.log("delete", node);
           // 将目标ID放入结果集ids
           // node.disabled = true;
-          idListToDelete.push(id);
-
+          docIdListToDelete.push(id);
+          docNameListToDelete.push(node.name);
           // 遍历所有子节点
           const children = node.children;
           if (Tool.isNotEmpty(children)) {
@@ -289,16 +291,27 @@ export default defineComponent({
      * @param docId 用户选中所要删除的文档的 id
      */
     const handleDeleteDoc = (docId: string) => {
+      // 清空数组，否则多次删除时，数组会一直增加
+      docIdListToDelete = [];
+      docNameListToDelete = [];
       getDeleteIds(level1.value, docId);
-      axios.delete("/doc/delete", {
-        data: {
-          ids: idListToDelete
-        }
-      }).then((response) => {
-        const respData = response.data;
-        if (respData.code == 0) {
-          handleQuery();
-        }
+      Modal.confirm({
+        title: '重要提醒',
+        icon: createVNode(ExclamationCircleOutlined),
+        content: '将删除：【' + docNameListToDelete.join("，") + "】删除后不可恢复，确认删除？",
+        onOk() {
+          console.log('deleteIds: ', docIdListToDelete);
+          axios.delete("/doc/delete", {
+            data: {
+              ids: docIdListToDelete
+            }
+          }).then((response) => {
+            const respData = response.data;
+            if (respData.code == 0) {
+              handleQuery();
+            }
+          })
+        },
       });
     }
 
