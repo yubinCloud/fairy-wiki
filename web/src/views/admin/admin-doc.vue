@@ -4,23 +4,16 @@
         :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
     >
       <p>
-        <a-form
-            layout="inline"
-            :model="docQueryForm"
-            @finish="handleQueryFormSubmit"
-        >
-
+        <a-form layout="inline" :model="docQueryForm">
           <a-form-item>
-            <a-button
-                type="primary"
-                html-type="submit"
-                size="large"
-            >
+            <a-button type="primary">
               查询
             </a-button>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="add()" size="large">新增</a-button>
+            <a-button type="primary" @click="add()">
+              新增
+            </a-button>
           </a-form-item>
         </a-form>
       </p>
@@ -28,8 +21,8 @@
           :columns="columns"
           :row-key="record => record.id"
           :data-source="level1"
-          :pagination="false"
           :loading="loading"
+          :pagination="false"
       >
         <template #cover="{ text: cover }">
           <img v-if="cover" :src="cover" alt="avatar" />
@@ -40,12 +33,14 @@
               编辑
             </a-button>
             <a-popconfirm
-                title="确认删除？"
-                ok-text="Yes"
-                cancel-text="No"
+                title="删除后不可恢复，确认删除?"
+                ok-text="是"
+                cancel-text="否"
                 @confirm="handleDeleteDoc(record.id)"
             >
-              <a-button type="danger">删除</a-button>
+              <a-button type="danger">
+                删除
+              </a-button>
             </a-popconfirm>
           </a-space>
         </template>
@@ -76,7 +71,10 @@
         </a-tree-select>
       </a-form-item>
       <a-form-item label="顺序">
-        <a-input v-model:value="doc.sort" type="textarea" />
+        <a-input v-model:value="doc.sort" />
+      </a-form-item>
+      <a-form-item label="内容">
+        <div id="content"></div>
       </a-form-item>
     </a-form>
   </a-modal>
@@ -90,6 +88,7 @@ import ExclamationCircleOutlined from "@ant-design/icons-vue/ExclamationCircleOu
 import { Tool } from "@/util/tool";
 import { Doc, DocQueryForm } from "@/models";
 import {useRoute} from "vue-router";
+import E from 'wangeditor';
 
 
 
@@ -178,6 +177,8 @@ export default defineComponent({
     const doc = ref();
     const modalVisible = ref(false);
     const modalLoading = ref(false);
+    let textEditor: E;
+
     const handleModalOk = () => {
       modalLoading.value = true;
       axios.post("/doc/save", doc.value).then((response) => {
@@ -223,6 +224,16 @@ export default defineComponent({
       }
     };
 
+    /**
+     * 使用 textEditor 创建富文本编辑框
+     **/
+    function createTextEditor() {
+      setTimeout(function () {
+        if (!textEditor)
+          textEditor = new E('#content');
+        textEditor.create();
+      }, 300);
+    }
 
     /**
      * 编辑
@@ -237,6 +248,8 @@ export default defineComponent({
 
       // 为选择树添加一个"无"
       treeSelectData.value.unshift({id: 0, name: '无'});
+      // 创建富文本编辑框
+      createTextEditor();
     };
 
     /**
@@ -251,6 +264,8 @@ export default defineComponent({
 
       // 为选择树添加一个"无"
       treeSelectData.value.unshift({id: 0, name: '无'});
+      // 创建富文本编辑框
+      createTextEditor();
     }
 
     let docIdListToDelete: Array<string> = [];
