@@ -5,46 +5,35 @@
           mode="inline"
           :style="{ height: '100%', borderRight: 0 }"
           @click="handleClick"
-          :openKeys="openKeys"
       >
         <a-menu-item key="welcome">
           <MailOutlined />
           <span>欢迎</span>
         </a-menu-item>
-        <a-sub-menu v-for="item in level1" :key="item.id" :disabled="true">
+        <a-sub-menu v-for="item in level1" :key="item.id">
           <template v-slot:title>
-            <span><user-outlined />{{item.name}}</span>
+            <span><user-outlined />{{ item.name }}</span>
           </template>
           <a-menu-item v-for="child in item.children" :key="child.id">
-            <MailOutlined /><span>{{child.name}}</span>
+            <MailOutlined /><span>{{ child.name }}</span>
           </a-menu-item>
         </a-sub-menu>
-        <a-menu-item key="tip" :disabled="true">
-          <span>以上菜单在分类管理配置</span>
-        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout-content
         :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
     >
       <div class="welcome" v-show="isShowWelcome">
-        <the-welcome></the-welcome>
+        <h1>欢迎进入 Fairy Wiki</h1>
       </div>
-      <a-list v-show="!isShowWelcome" item-layout="vertical" size="large" :grid="{ gutter: 20, column: 3 }" :data-source="listData">
+      <a-list v-show="!isShowWelcome" item-layout="vertical" size="large"
+              :grid="{ gutter: 20, column: 3 }" :data-source="ebooks">
         <template #renderItem="{ item }">
           <a-list-item key="item.name">
             <template #actions>
-              <span>
-                <component v-bind:is="'FileOutlined'" style="margin-right: 8px" />
-                {{ item.docCount }}
-              </span>
-              <span>
-                <component v-bind:is="'UserOutlined'" style="margin-right: 8px" />
-                {{ item.viewCount }}
-              </span>
-              <span>
-                <component v-bind:is="'LikeOutlined'" style="margin-right: 8px" />
-                {{ item.voteCount }}
+              <span v-for="{ type, text } in actions" :key="type">
+                <component v-bind:is="type" style="margin-right: 8px" />
+                {{ text }}
               </span>
             </template>
             <a-list-item-meta :description="item.description">
@@ -66,18 +55,10 @@
 import {defineComponent, onMounted, ref} from 'vue';
 import axios from 'axios';
 import { StarOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons-vue';
+import {Tool} from "@/util/tool";
+import {message} from "_ant-design-vue@2.0.0-rc.3@ant-design-vue";
+import {Category} from "@/models";
 
-// for (let i = 0; i < 23; i++) {
-//   listData.push({
-//     href: 'https://www.antdv.com/',
-//     title: `ant design vue part ${i}`,
-//     avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
-//     description:
-//         'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-//     content:
-//         'We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.',
-//   });
-// }
 
 export default defineComponent({
   name: 'Home',
@@ -88,17 +69,11 @@ export default defineComponent({
   },
   setup() {
     console.log("setup");
-    let listData = ref();
-
-    onMounted(() => {
-      console.log("onMounted");
-      axios.get("/ebook/list").then((response) => {
-        console.log(response);
-        const respData = response.data;
-        const pageData = respData.data;
-        listData.value = pageData.list;
-      })
-    });
+    let ebooks = ref();
+    let categories: Category[];
+    let level1 = ref();
+    let isShowWelcome = ref(true);
+    let categoryId2: string|null = null;
 
     const pagination = {
       onChange: (page: number) => {
@@ -113,10 +88,65 @@ export default defineComponent({
       { type: 'MessageOutlined', text: '2' },
     ];
 
+    /**
+     * 查询所有分类
+     **/
+    const handleQueryCategory = () => {
+      axios.get("/category/all").then((response) => {
+        const respData = response.data;
+
+        if (respData.code == 0) {
+          categories = respData.data;
+          console.log("原始数组：", categories);
+
+          level1.value = [];
+          level1.value = Tool.array2Tree(categories, 0);
+          console.log("树形结构：", level1);
+
+        } else {
+          message.error(respData.msg);
+        }
+      });
+    };
+
+    const handleQueryEbook = () => {
+      let queryParams = {
+        pageNum: 1,
+        pageSize: 1000,
+        categoryId2: categoryId2
+      }
+      axios.get("/ebook/query", {params: queryParams}).then((response) => {
+        console.log(response);
+        const respData = response.data;
+        const pageData = respData.data;
+        ebooks.value = pageData.list;
+      })
+    }
+
+    const handleClick = (value: any) => {
+      if (value.key === 'welcome') {
+        isShowWelcome.value = true;
+      } else {
+        categoryId2 = value.key;
+        isShowWelcome.value = false;
+        handleQueryEbook();
+      }
+    };
+
+    onMounted(() => {
+      handleQueryCategory();
+    });
+
+
     return {
-      listData,
+      ebooks,
       pagination,
       actions,
+      level1,
+      isShowWelcome,
+
+      handleQueryCategory,
+      handleClick,
     }
   }
 });

@@ -40,6 +40,9 @@
         <template #cover="{ text: cover }">
           <img v-if="cover" :src="cover" alt="avatar" />
         </template>
+        <template v-slot:category="{ text, record }">
+          <span>{{ getCategoryName(record.category1Id) }} / {{ getCategoryName(record.category2Id) }}</span>
+        </template>
         <template v-slot:action="{ text, record }">
           <a-space size="small">
             <a-button type="primary" @click="edit(record)">
@@ -72,11 +75,11 @@
       <a-form-item label="名称">
         <a-input v-model:value="ebook.name" />
       </a-form-item>
-      <a-form-item label="分类一">
-        <a-input v-model:value="ebook.category1Id" />
-      </a-form-item>
-      <a-form-item label="分类二">
-        <a-input v-model:value="ebook.category2Id" />
+      <a-form-item label="分类">
+        <a-cascader v-model:value="categoryIds"
+                    :field-names="{ label: 'name', value: 'id', children: 'children' }"
+                    :options="level1"
+                    placeholder="Please select" />
       </a-form-item>
       <a-form-item label="描述">
         <a-input v-model:value="ebook.description" type="textarea" />
@@ -89,11 +92,8 @@
 import { defineComponent, onMounted, ref, UnwrapRef, reactive } from 'vue';
 import axios from 'axios';
 import { message } from 'ant-design-vue'
-import {Tool} from "@/util/tool";
-
-interface EbookQueryForm {
-  name: string;
-}
+import { Tool } from "@/util/tool";
+import {Category, Ebook, EbookQueryForm} from "@/models"
 
 export default defineComponent({
   name: 'AdminEbook',
@@ -121,13 +121,8 @@ export default defineComponent({
         dataIndex: 'name'
       },
       {
-        title: '分类一',
-        key: 'category1Id',
-        dataIndex: 'category1Id'
-      },
-      {
-        title: '分类二',
-        dataIndex: 'category2Id'
+        title: '分类',
+        slots: { customRender: 'category' }
       },
       {
         title: '文档数',
@@ -148,44 +143,17 @@ export default defineComponent({
       }
     ];
 
-    /**
-     * 根据表单提交的数据进行查询
-     **/
-    const handleQueryFormSubmit = (ebookForm: EbookQueryForm) => {
-      loading.value = true;
-      axios.get("/ebook/query", {
-        params: {
-          name: ebookForm.name,
-          pageNum: 1,
-          pageSize: 4
-        }
-      }).then((response) => {
-        loading.value = false;
-        const respData = response.data;
-
-        if (respData.code == 0) {
-          const pageData = respData.data;
-          ebooks.value = pageData.list;
-
-          // 重置分页按钮
-          pagination.value.current = 1;
-          pagination.value.total = pageData.total;
-        } else {
-          message.error(respData.msg);
-        }
-      });
-    };
-
 
     /**
      * 数据查询
      **/
-    const handleQuery = (queryParams: any) => {
+    const handleQueryEbooks = (queryParams: any) => {
       loading.value = true;
-      axios.get("/ebook/list", {
+      axios.get("/ebook/query", {
         params: {
           pageNum: queryParams.pageNum,
-          pageSize: queryParams.pageSize
+          pageSize: queryParams.pageSize,
+          name: queryParams.name,
         }
       }).then((response) => {
         loading.value = false;
@@ -205,22 +173,48 @@ export default defineComponent({
     };
 
     /**
+     * 根据表单提交的数据进行查询
+     **/
+    const handleQueryFormSubmit = (ebookForm: EbookQueryForm) => {
+      handleQueryEbooks({
+        pageNum: 1,
+        pageSize: 4,
+        name: ebookForm.name,
+      });
+    };
+
+    /**
      * 表格点击页码时触发
      */
     const handleTableChange = (pagination: any) => {
       console.log("看看自带的分页参数都有啥：", pagination);
-      handleQuery({
+      handleQueryEbooks({
         pageNum: pagination.current,
         pageSize: pagination.pageSize
       });
     };
 
     // -------- 表单 ---------
-    const ebook = ref({});
+    const categoryIds = ref<string[]>([]);
+
+    const emptyEbook = {
+      id: '',
+      name: '',
+      category1Id: '',
+      category2Id: '',
+      description: '',
+      cover: '',
+      docCount: 0,
+      viewCount: 0,
+      voteCount: 0
+    };
+    const ebook = ref<Ebook>(Tool.copy(emptyEbook));
     const modalVisible = ref(false);
     const modalLoading = ref(false);
     const handleModalOk = () => {
       modalLoading.value = true;
+      ebook.value.category1Id = categoryIds.value[0];
+      ebook.value.category2Id = categoryIds.value[1];
       axios.post("/ebook/save", ebook.value).then((response) => {
         const respData = response.data;
         modalLoading.value = false;
@@ -229,7 +223,7 @@ export default defineComponent({
         } else {
           message.error(respData.msg);
         }
-        handleQuery({
+        handleQueryEbooks({
           page: pagination.value.current,
           size: pagination.value.pageSize,
         });
@@ -242,6 +236,7 @@ export default defineComponent({
     const edit = (record: any) => {
       modalVisible.value = true;
       ebook.value = Tool.copy(record);
+      categoryIds.value = [ebook.value.category1Id, ebook.value.category2Id];
     };
 
     /**
@@ -249,7 +244,7 @@ export default defineComponent({
      */
     const add = () => {
       modalVisible.value = true;
-      ebook.value = {};
+      ebook.value = Tool.copy(emptyEbook);
     }
 
     /**
@@ -260,7 +255,7 @@ export default defineComponent({
       axios.delete("/ebook/delete/" + ebookId).then((response) => {
         const respData = response.data;
         if (respData.code == 0) {
-          handleQuery({
+          handleQueryEbooks({
             page: pagination.value.current,
             size: pagination.value.pageSize,
           });
@@ -268,9 +263,44 @@ export default defineComponent({
       });
     }
 
+    const level1 =  ref();
+    let categories: Category[];
+    /**
+     * 查询所有分类
+     **/
+    const handleQueryCategory = () => {
+      loading.value = true;
+      axios.get("/category/all").then((response) => {
+        loading.value = false;
+        const respData = response.data;
+
+        if (respData.code == 0) {
+          categories = respData.data;
+          console.log("原始数组：", categories);
+
+          level1.value = [];
+          level1.value = Tool.array2Tree(categories, 0);
+          console.log("树形结构：", level1);
+
+        } else {
+          message.error(respData.msg);
+        }
+      });
+    };
+
+    const getCategoryName = (cid: string) => {
+      let result = "";
+      for (let item of categories) {
+        if (item.id === cid) {
+          result = item.name;
+        }
+      }
+      return result;
+    };
 
     onMounted(() => {
-      handleQuery({
+      handleQueryCategory();
+      handleQueryEbooks({
         pageNum: 1,
         pageSize: pagination.value.pageSize,
       });
@@ -285,12 +315,15 @@ export default defineComponent({
       pagination,
       columns,
       loading,
+      categoryIds,
+      level1,
       handleTableChange,
 
       edit,
       add,
       handleDeleteEbook,
       handleQueryFormSubmit,
+      getCategoryName,
 
       ebook,
       modalVisible,

@@ -2,7 +2,6 @@ package io.github.yubincloud.fairywiki.controller;
 
 import io.github.yubincloud.fairywiki.dto.req.EbookQueryReqDto;
 import io.github.yubincloud.fairywiki.dto.req.EbookSaveReqDto;
-import io.github.yubincloud.fairywiki.dto.req.PageReqDto;
 import io.github.yubincloud.fairywiki.dto.resp.EbookQueryRespDto;
 import io.github.yubincloud.fairywiki.dto.resp.ErrorCode;
 import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/ebook")
@@ -22,17 +20,13 @@ public class EbookController {
     private EbookService ebookService;
 
     /**
-     * 获取全部的电子书信息
+     * 对 ebook 进行查询的接口
+     * @param ebookQueryReqDto 查询条件的参数
+     * @return 查询到的所有ebook
      */
-    @GetMapping("/list")
-    public RestfulModel<PageRespDto<EbookQueryRespDto>> getAllEbook(@Valid PageReqDto pageReqDto) {
-        PageRespDto<EbookQueryRespDto> bookList = ebookService.queryAll(pageReqDto.getPageNum(), pageReqDto.getPageSize());
-        return new RestfulModel<>(ErrorCode.SUCCESS, "", bookList);
-    }
-
     @GetMapping("/query")
     public RestfulModel<PageRespDto<EbookQueryRespDto>> queryEbooks(@Valid EbookQueryReqDto ebookQueryReqDto) {
-        PageRespDto<EbookQueryRespDto> bookList = ebookService.fuzzyQueryByName(ebookQueryReqDto);
+        PageRespDto<EbookQueryRespDto> bookList = ebookService.queryEbooks(ebookQueryReqDto);
         return new RestfulModel<>(ErrorCode.SUCCESS, "", bookList);
     }
 
