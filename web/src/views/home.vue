@@ -26,7 +26,8 @@
       <div class="welcome" v-show="isShowWelcome">
         <h1>欢迎进入 Fairy Wiki</h1>
       </div>
-      <a-list v-show="!isShowWelcome" item-layout="vertical" size="large" :grid="{ gutter: 20, column: 3 }" :data-source="listData">
+      <a-list v-show="!isShowWelcome" item-layout="vertical" size="large"
+              :grid="{ gutter: 20, column: 3 }" :data-source="ebooks">
         <template #renderItem="{ item }">
           <a-list-item key="item.name">
             <template #actions>
@@ -68,10 +69,11 @@ export default defineComponent({
   },
   setup() {
     console.log("setup");
-    let listData = ref();
+    let ebooks = ref();
     let categories: Category[];
     let level1 = ref();
     let isShowWelcome = ref(true);
+    let categoryId2: string|null = null;
 
     const pagination = {
       onChange: (page: number) => {
@@ -107,25 +109,37 @@ export default defineComponent({
       });
     };
 
-    const handleClick = (value: any) => {
-      isShowWelcome.value = value.key === 'welcome';
-    };
-
-    onMounted(() => {
-
-      handleQueryCategory()
-      console.log("onMounted");
-      axios.get("/ebook/query").then((response) => {
+    const handleQueryEbook = () => {
+      let queryParams = {
+        pageNum: 1,
+        pageSize: 1000,
+        categoryId2: categoryId2
+      }
+      axios.get("/ebook/query", {params: queryParams}).then((response) => {
         console.log(response);
         const respData = response.data;
         const pageData = respData.data;
-        listData.value = pageData.list;
+        ebooks.value = pageData.list;
       })
+    }
+
+    const handleClick = (value: any) => {
+      if (value.key === 'welcome') {
+        isShowWelcome.value = true;
+      } else {
+        categoryId2 = value.key;
+        isShowWelcome.value = false;
+        handleQueryEbook();
+      }
+    };
+
+    onMounted(() => {
+      handleQueryCategory();
     });
 
 
     return {
-      listData,
+      ebooks,
       pagination,
       actions,
       level1,
