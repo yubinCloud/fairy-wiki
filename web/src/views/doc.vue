@@ -13,6 +13,7 @@
           </a-tree>
         </a-col>
         <a-col :span="18">
+          <div :innerHTML="htmlContent"></div>
         </a-col>
       </a-row>
     </a-layout-content>
@@ -32,6 +33,8 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const docs = ref();
+    const htmlContent = ref<string>();
+    htmlContent.value = "";
 
     /**
      * 一级文档树，children属性就是二级文档
@@ -64,12 +67,38 @@ export default defineComponent({
       });
     };
 
+    /**
+     * 内容查询
+     **/
+    const handleQueryDocContent = (docId: string) => {
+      axios.get("/doc/read-content/" + docId).then((response) => {
+        const respData = response.data;
+        if (respData.code === 0) {
+          htmlContent.value = respData.data;
+          console.log(htmlContent);
+        } else {
+          message.error(respData.msg);
+        }
+      });
+    };
+
+    const onSelect = (selectedKeys: any, info: any) => {
+      console.log('selected', selectedKeys, info);
+      if (Tool.isNotEmpty(selectedKeys)) {
+        // 加载内容
+        handleQueryDocContent(selectedKeys[0]);
+      }
+    };
+
     onMounted(() => {
       handleQueryDoc();
     });
 
     return {
       level1,
+
+      htmlContent,
+      onSelect,
     }
   }
 });
