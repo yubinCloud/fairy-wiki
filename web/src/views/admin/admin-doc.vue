@@ -187,12 +187,16 @@ export default defineComponent({
     // -------- 表单 ---------
     const treeSelectData = ref();  // 因为树选择组件的属性状态，会随当前编辑的节点而变化，所以单独声明一个响应式变量
     treeSelectData.value = [];
-    const doc = ref({});
+    const doc = ref();
+    doc.value = {};
     const modalVisible = ref(false);
     const modalLoading = ref(false);
+    let textEditor: E;
 
     const handleSaveDoc = () => {
       modalLoading.value = true;
+      doc.value.content = textEditor.txt.html();
+
       axios.post("/doc/save", doc.value).then((response) => {
         const respData = response.data;
         modalLoading.value = false;
@@ -332,7 +336,7 @@ export default defineComponent({
 
     onMounted(() => {
       handleQuery();
-      const textEditor = new E('#content');
+      textEditor = new E('#content');
       textEditor.config.zIndex = 0;
       textEditor.create();
     });

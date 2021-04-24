@@ -2,12 +2,14 @@ package io.github.yubincloud.fairywiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.github.yubincloud.fairywiki.domain.Content;
 import io.github.yubincloud.fairywiki.domain.Doc;
 import io.github.yubincloud.fairywiki.domain.DocExample;
 import io.github.yubincloud.fairywiki.dto.req.DocQueryReqDto;
 import io.github.yubincloud.fairywiki.dto.req.DocSaveReqDto;
 import io.github.yubincloud.fairywiki.dto.resp.DocQueryRespDto;
 import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
+import io.github.yubincloud.fairywiki.mapper.ContentMapper;
 import io.github.yubincloud.fairywiki.mapper.DocMapper;
 import io.github.yubincloud.fairywiki.utils.CopyUtil;
 import io.github.yubincloud.fairywiki.utils.SnowFlake;
@@ -26,6 +28,9 @@ public class DocService {
 
     @Resource
     private DocMapper docMapper;
+
+    @Resource
+    private ContentMapper contentMapper;
 
     @Resource
     private SnowFlake snowFlake;
@@ -69,11 +74,22 @@ public class DocService {
      */
     public void save(DocSaveReqDto reqDto) {
         Doc docRecord = CopyUtil.copy(reqDto, Doc.class);
+        Content docContent = CopyUtil.copy(reqDto, Content.class);
         if (ObjectUtils.isEmpty(docRecord.getId())) {  // 判断 id 是否为空
-            docRecord.setId(snowFlake.nextId());
+            // 新增
+            Long docId = snowFlake.nextId();
+            docRecord.setId(docId);
             docMapper.insertSelective(docRecord);
+
+            docContent.setId(docId);
+            contentMapper.insertSelective(docContent);
         } else {
+            // 更新
             docMapper.updateByPrimaryKey(docRecord);
+            int count = contentMapper.updateByPrimaryKeyWithBLOBs(docContent);  // 带大字段的更新
+            if (count == 0) {
+                contentMapper.insert(docContent);
+            }
         }
     }
 

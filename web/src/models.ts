@@ -49,6 +49,7 @@ export interface Doc {
     sort: number;
     viewCount: number;
     voteCount: number;
+    content: string;
 }
 
 /**
