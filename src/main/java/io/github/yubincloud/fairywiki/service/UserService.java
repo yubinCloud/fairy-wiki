@@ -5,6 +5,8 @@ import com.github.pagehelper.PageInfo;
 import io.github.yubincloud.fairywiki.domain.User;
 import io.github.yubincloud.fairywiki.domain.UserExample;
 import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
+import io.github.yubincloud.fairywiki.exception.BusinessException;
+import io.github.yubincloud.fairywiki.exception.BusinessExceptionCode;
 import io.github.yubincloud.fairywiki.mapper.UserMapper;
 import io.github.yubincloud.fairywiki.dto.req.UserQueryReqDto;
 import io.github.yubincloud.fairywiki.dto.req.UserSaveReqDto;
@@ -14,6 +16,7 @@ import io.github.yubincloud.fairywiki.utils.SnowFlake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
@@ -54,14 +57,20 @@ public class UserService {
     }
 
     /**
-     * 保存
+     * 保存一个用户
      */
     public void save(UserSaveReqDto req) {
         User user = CopyUtil.copy(req, User.class);
         if (ObjectUtils.isEmpty(req.getId())) {
-            // 新增
-            user.setId(snowFlake.nextId());
-            userMapper.insert(user);
+            User userInDb = selectByLoginName(req.getLoginName());  // 存于数据库中的用户信息
+            if (ObjectUtils.isEmpty(userInDb)) {  // 新增之前判断一下 LoginName 是否重复
+                // 新增
+                user.setId(snowFlake.nextId());
+                userMapper.insert(user);
+            } else {
+                // 用户名已存在
+                throw new BusinessException(BusinessExceptionCode.USER_LOGIN_NAME_EXIST);
+            }
         } else {
             // 更新
             userMapper.updateByPrimaryKey(user);
@@ -70,5 +79,22 @@ public class UserService {
 
     public void delete(Long id) {
         userMapper.deleteByPrimaryKey(id);
+    }
+
+    /**
+     * 根据用户的 LoginName 来获取该用户的信息
+     * @param LoginName 所要查询的用户的 LoginName
+     * @return 含有该用户信息的 User 实体对象，若查询不到则返回 null
+     */
+    public User selectByLoginName(String LoginName) {
+        UserExample userExample = new UserExample();
+        UserExample.Criteria criteria = userExample.createCriteria();
+        criteria.andLoginNameEqualTo(LoginName);
+        List<User> userList = userMapper.selectByExample(userExample);
+        if (CollectionUtils.isEmpty(userList)) {
+            return null;
+        } else {
+            return userList.get(0);
+        }
     }
 }
