@@ -200,7 +200,9 @@ export default defineComponent({
 
     // -------- 表单 ---------
     const doc = ref();
-    doc.value = {};
+    doc.value = {
+      ebookId: route.query.ebookId  // 初始时便获得了该路由下的 ebookId
+    };
     let textEditor: E;
 
     const handleSaveDoc = () => {
