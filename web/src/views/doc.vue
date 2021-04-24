@@ -13,7 +13,7 @@
           </a-tree>
         </a-col>
         <a-col :span="18">
-          <div :innerHTML="htmlContent"></div>
+          <div class="wangeditor" :innerHTML="htmlContent"></div>
         </a-col>
       </a-row>
     </a-layout-content>
@@ -103,3 +103,52 @@ export default defineComponent({
   }
 });
 </script>
+
+<style>
+/* wangeditor默认样式, 参照: http://www.wangeditor.com/doc/pages/02-%E5%86%85%E5%AE%B9%E5%A4%84%E7%90%86/03-%E8%8E%B7%E5%8F%96html.html */
+/* table 样式 */
+.wangeditor table {
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+}
+.wangeditor table td,
+.wangeditor table th {
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  padding: 3px 5px;
+}
+.wangeditor table th {
+  border-bottom: 2px solid #ccc;
+  text-align: center;
+}
+
+/* blockquote 样式 */
+.wangeditor blockquote {
+  display: block;
+  border-left: 8px solid #d0e5f2;
+  padding: 5px 10px;
+  margin: 10px 0;
+  line-height: 1.4;
+  font-size: 100%;
+  background-color: #f1f1f1;
+}
+
+/* code 样式 */
+.wangeditor code {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1;
+  background-color: #f1f1f1;
+  border-radius: 3px;
+  padding: 3px 5px;
+  margin: 0 3px;
+}
+.wangeditor pre code {
+  display: block;
+}
+
+/* ul ol 样式 */
+.wangeditor ul, ol {
+  margin: 10px 0 10px 20px;
+}
+</style>
