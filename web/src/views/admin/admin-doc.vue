@@ -81,11 +81,20 @@
               <a-input v-model:value="doc.sort" placeholder="顺序"/>
             </a-form-item>
             <a-form-item>
+              <a-button type="primary" @click="handlePreviewContent()">
+                <EyeOutlined /> 内容预览
+              </a-button>
+            </a-form-item>
+            <a-form-item>
               <div id="content"></div>
             </a-form-item>
           </a-form>
         </a-col>
       </a-row>
+
+      <a-drawer width="900" placement="right" :closable="false" :visible="drawerVisible" @close="onDrawerClose">
+        <div class="wangeditor" :innerHTML="previewHtml"></div>
+      </a-drawer>
 
     </a-layout-content>
   </a-layout>
@@ -101,15 +110,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, UnwrapRef, reactive, createVNode } from 'vue';
+import {createVNode, defineComponent, onMounted, reactive, ref, UnwrapRef} from 'vue';
 import axios from 'axios';
-import { message, Modal } from 'ant-design-vue';
+import {message, Modal} from 'ant-design-vue';
 import ExclamationCircleOutlined from "@ant-design/icons-vue/ExclamationCircleOutlined";
-import { Tool } from "@/util/tool";
-import { Doc, DocQueryForm } from "@/models";
+import {Tool} from "@/util/tool";
+import {Doc, DocQueryForm} from "@/models";
 import {useRoute} from "vue-router";
 import E from 'wangeditor';
-
 
 
 export default defineComponent({
@@ -348,6 +356,16 @@ export default defineComponent({
       });
     }
 
+    // ----------------富文本预览--------------
+    const drawerVisible = ref(false);
+    const previewHtml = ref();
+    const handlePreviewContent = () => {
+      previewHtml.value = textEditor.txt.html();
+      drawerVisible.value = true;
+    };
+    const onDrawerClose = () => {
+      drawerVisible.value = false;
+    };
 
     onMounted(() => {
       handleQueryDocs();
@@ -375,6 +393,11 @@ export default defineComponent({
 
       doc,
       treeSelectData,
+
+      drawerVisible,
+      previewHtml,
+      handlePreviewContent,
+      onDrawerClose,
     }
   }
 });
