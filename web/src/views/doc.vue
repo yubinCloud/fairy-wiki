@@ -8,7 +8,7 @@
               :tree-data="level1"
               @select="onSelect"
               :replaceFields="{title: 'name', key: 'id', value: 'id'}"
-              :defaultExpandAll="true"
+              :defaultSelectedKeys="defaultSelectedKeys"
           >
           </a-tree>
         </a-col>
@@ -33,8 +33,10 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const docs = ref();
-    const htmlContent = ref<string>();
+    const htmlContent = ref<string>();  // 所要展示的文档的内容
     htmlContent.value = "";
+    const defaultSelectedKeys = ref();  // 初始时默认选中的文档 keys
+    defaultSelectedKeys.value = [];
 
     /**
      * 一级文档树，children属性就是二级文档
@@ -51,23 +53,6 @@ export default defineComponent({
     level1.value = [];
 
     /**
-     * 数据查询
-     **/
-    const handleQueryDoc = () => {
-      axios.get("/doc/query/" + route.query.ebookId).then((response) => {
-        const respData = response.data;
-        if (respData.code === 0) {
-          docs.value = respData.data;
-
-          level1.value = [];
-          level1.value = Tool.array2Tree(docs.value, 0);
-        } else {
-          message.error(respData.message);
-        }
-      });
-    };
-
-    /**
      * 内容查询
      **/
     const handleQueryDocContent = (docId: string) => {
@@ -78,6 +63,28 @@ export default defineComponent({
           console.log(htmlContent);
         } else {
           message.error(respData.msg);
+        }
+      });
+    };
+
+    /**
+     * 数据查询
+     **/
+    const handleQueryDoc = () => {
+      axios.get("/doc/query/" + route.query.ebookId).then((response) => {
+        const respData = response.data;
+        if (respData.code === 0) {
+          docs.value = respData.data;
+
+          level1.value = [];
+          level1.value = Tool.array2Tree(docs.value, 0);
+
+          if (Tool.isNotEmpty(level1)) {
+            defaultSelectedKeys.value = [level1.value[0].id];  // 默认选中 level1 的第一个文档
+            handleQueryDocContent(level1.value[0].id);  // 并对该默认选中的文档进行一次内容查询并展示出来
+          }
+        } else {
+          message.error(respData.message);
         }
       });
     };
