@@ -112,7 +112,7 @@ public class DocService {
      */
     public String readDocContent(Long docId) {
         Content content = contentMapper.selectByPrimaryKey(docId);
-        if (content == null)
+        if (ObjectUtils.isEmpty(content))
             return "";
         return content.getContent();
     }
