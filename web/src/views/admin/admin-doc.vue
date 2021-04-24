@@ -123,6 +123,8 @@ export default defineComponent({
 
     const docs = ref<Doc[]>([]);
     const loading = ref(false);
+    const treeSelectData = ref();  // 因为树选择组件的属性状态，会随当前编辑的节点而变化，所以单独声明一个响应式变量
+    treeSelectData.value = [];
 
     const columns = [
       {
@@ -155,7 +157,7 @@ export default defineComponent({
     /**
      * 数据查询
      **/
-    const handleQuery = () => {
+    const handleQueryDocs = () => {
       loading.value = true;
       level1.value = [];
       axios.get("/doc/query/" + route.query.ebookId).then((response) => {
@@ -170,6 +172,10 @@ export default defineComponent({
           level1.value = Tool.array2Tree(docs.value, 0);
           console.log("树形结构：", level1);
 
+          // 父文档下拉框初始化，相当于点击新增
+          treeSelectData.value = Tool.copy(level1.value);
+          // 为选择树添加一个"无"
+          treeSelectData.value.unshift({id: 0, name: '无'});
         } else {
           message.error(respData.msg);
         }
@@ -180,13 +186,11 @@ export default defineComponent({
      * 根据表单提交的数据进行查询
      **/
     const handleQueryFormSubmit = () => {
-      handleQuery();
+      handleQueryDocs();
     };
 
 
     // -------- 表单 ---------
-    const treeSelectData = ref();  // 因为树选择组件的属性状态，会随当前编辑的节点而变化，所以单独声明一个响应式变量
-    treeSelectData.value = [];
     const doc = ref();
     doc.value = {};
     let textEditor: E;
@@ -201,7 +205,7 @@ export default defineComponent({
         } else {
           message.error(respData.msg);
         }
-        handleQuery();
+        handleQueryDocs();
       })
     };
 
@@ -337,7 +341,7 @@ export default defineComponent({
           }).then((response) => {
             const respData = response.data;
             if (respData.code == 0) {
-              handleQuery();
+              handleQueryDocs();
             }
           })
         },
@@ -346,7 +350,7 @@ export default defineComponent({
 
 
     onMounted(() => {
-      handleQuery();
+      handleQueryDocs();
       textEditor = new E('#content');
       textEditor.config.zIndex = 0;
       textEditor.create();
