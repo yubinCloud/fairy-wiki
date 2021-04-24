@@ -151,4 +151,12 @@ export default defineComponent({
 .wangeditor ul, ol {
   margin: 10px 0 10px 20px;
 }
+
+/* 和antdv p冲突，覆盖掉 */
+.wangeditor blockquote p {
+  font-family:"YouYuan";
+  margin: 20px 10px !important;  /* 加上 !important 以提高优先级从而覆盖掉原 Ant Design 的p标签样式*/
+  font-size: 16px !important;
+  font-weight:600;
+}
 </style>
