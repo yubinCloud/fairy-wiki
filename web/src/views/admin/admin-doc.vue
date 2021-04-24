@@ -240,6 +240,20 @@ export default defineComponent({
       }
     };
 
+    /**
+     * 内容查询
+     **/
+    const handleQueryContent = () => {
+      axios.get("/doc/read-content/" + doc.value.id).then((response) => {
+        const respData = response.data;
+        if (respData.code === 0) {
+          textEditor.txt.html(respData.data);
+        } else {
+          message.error(respData.msg);
+        }
+      });
+    };
+
 
     /**
      * 编辑
@@ -247,6 +261,7 @@ export default defineComponent({
     const edit = (record: any) => {
       modalVisible.value = true;
       doc.value = Tool.copy(record);
+      handleQueryContent();
 
       // 不能选择当前节点及其所有子孙节点，作为父节点，会使树断开
       treeSelectData.value = Tool.copy(level1.value);

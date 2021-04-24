@@ -55,4 +55,15 @@ public class DocController {
         docService.deleteDocs(docDeleteReqDto.getIds());
         return new RestfulModel<>(ErrorCode.SUCCESS, "", 0);
     }
+
+    /**
+     * 读取文档的内容
+     * @param docId 所要读取的文档的 id
+     * @return 读取到的内容
+     */
+    @GetMapping("/read-content/{docId}")
+    public RestfulModel<String> readDocContent(@PathVariable Long docId) {
+        String docContent = docService.readDocContent(docId);
+        return new RestfulModel<>(0, "", docContent);
+    }
 }

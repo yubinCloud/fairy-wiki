@@ -103,4 +103,16 @@ public class DocService {
         criteria.andIdIn(idList);
         docMapper.deleteByExample(docExample);
     }
+
+    /**
+     * 读取一篇文档的内容
+     * @param docId 所要读取的文档的id
+     * @return 该文档的内容
+     */
+    public String readDocContent(Long docId) {
+        Content content = contentMapper.selectByPrimaryKey(docId);
+        if (content == null)
+            return "";
+        return content.getContent();
+    }
 }
