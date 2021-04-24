@@ -158,7 +158,7 @@ export default defineComponent({
     const handleQuery = () => {
       loading.value = true;
       level1.value = [];
-      axios.get("/doc/all").then((response) => {
+      axios.get("/doc/query/" + route.query.ebookId).then((response) => {
         loading.value = false;
         const respData = response.data;
 

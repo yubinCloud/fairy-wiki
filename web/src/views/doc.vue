@@ -51,7 +51,7 @@ export default defineComponent({
      * 数据查询
      **/
     const handleQueryDoc = () => {
-      axios.get("/doc/all").then((response) => {
+      axios.get("/doc/query/" + route.query.ebookId).then((response) => {
         const respData = response.data;
         if (respData.code === 0) {
           docs.value = respData.data;

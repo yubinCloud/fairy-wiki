@@ -24,9 +24,9 @@ public class DocController {
     /**
      * 获取全部 Doc 的接口
      */
-    @GetMapping("/all")
-    public RestfulModel<List<DocQueryRespDto>> allCategories() {
-        List<DocQueryRespDto> docList = docService.fetchAllCategories();
+    @GetMapping("/query/{ebookId}")
+    public RestfulModel<List<DocQueryRespDto>> queryDocs(@PathVariable Long ebookId) {
+        List<DocQueryRespDto> docList = docService.queryDocs(ebookId);
         return new RestfulModel<>(ErrorCode.SUCCESS, "", docList);
     }
 

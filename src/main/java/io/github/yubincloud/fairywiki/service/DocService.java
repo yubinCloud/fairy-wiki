@@ -38,8 +38,9 @@ public class DocService {
     /**
      * 获取全部 Doc
      */
-    public List<DocQueryRespDto> fetchAllCategories() {
+    public List<DocQueryRespDto> queryDocs(Long ebookId) {
         DocExample docExample = new DocExample();
+        docExample.createCriteria().andEbookIdEqualTo(ebookId);
         docExample.setOrderByClause("sort asc");
         List<Doc> docList = docMapper.selectByExample(docExample);
         return CopyUtil.copyList(docList, DocQueryRespDto.class);
