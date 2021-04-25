@@ -1,12 +1,10 @@
 package io.github.yubincloud.fairywiki.controller;
 
+import io.github.yubincloud.fairywiki.dto.req.UserLoginReqDto;
 import io.github.yubincloud.fairywiki.dto.req.UserQueryReqDto;
 import io.github.yubincloud.fairywiki.dto.req.UserResetPwdReqDto;
 import io.github.yubincloud.fairywiki.dto.req.UserSaveReqDto;
-import io.github.yubincloud.fairywiki.dto.resp.ErrorCode;
-import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
-import io.github.yubincloud.fairywiki.dto.resp.RestfulModel;
-import io.github.yubincloud.fairywiki.dto.resp.UserQueryRespDto;
+import io.github.yubincloud.fairywiki.dto.resp.*;
 import io.github.yubincloud.fairywiki.service.UserService;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
@@ -46,5 +44,19 @@ public class UserController {
         userResetPwdReqDto.setPassword(DigestUtils.md5DigestAsHex(userResetPwdReqDto.getPassword().getBytes()));
         userService.resetPwd(userResetPwdReqDto);
         return new RestfulModel<>(ErrorCode.SUCCESS, "", 0);
+    }
+
+    /**
+     * 用户登录接口
+     * @param userLoginReqDto 用户的用户名及密码
+     * @return 登录成功则返回该用户的信息，失败则返回登录失败提示
+     */
+    @PostMapping("/login")
+    public RestfulModel<UserLoginRespDto> login(@RequestBody @Valid UserLoginReqDto userLoginReqDto) {
+        userLoginReqDto.setPassword(
+                DigestUtils.md5DigestAsHex(userLoginReqDto.getPassword().getBytes())
+        );
+        UserLoginRespDto userLoginRespDto = userService.login(userLoginReqDto);
+        return new RestfulModel<>(ErrorCode.SUCCESS, "", userLoginRespDto);
     }
 }

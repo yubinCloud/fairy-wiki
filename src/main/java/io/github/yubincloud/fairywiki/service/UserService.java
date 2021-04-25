@@ -4,9 +4,11 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.github.yubincloud.fairywiki.domain.User;
 import io.github.yubincloud.fairywiki.domain.UserExample;
+import io.github.yubincloud.fairywiki.dto.req.UserLoginReqDto;
 import io.github.yubincloud.fairywiki.dto.req.UserResetPwdReqDto;
 import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
 import io.github.yubincloud.fairywiki.dto.resp.RestfulModel;
+import io.github.yubincloud.fairywiki.dto.resp.UserLoginRespDto;
 import io.github.yubincloud.fairywiki.exception.BusinessException;
 import io.github.yubincloud.fairywiki.exception.BusinessExceptionCode;
 import io.github.yubincloud.fairywiki.mapper.UserMapper;
@@ -105,5 +107,29 @@ public class UserService {
     public void resetPwd(UserResetPwdReqDto reqDto) {
         User user = CopyUtil.copy(reqDto, User.class);
         userMapper.updateByPrimaryKeySelective(user);
+    }
+
+    /**
+     * 对用户登录进行校验
+     * @param reqDto 用户登录请求的信息
+     * @return 若登录成功，则返回该用户的信息；失败则抛出 BusinessException
+     */
+    public UserLoginRespDto login(UserLoginReqDto reqDto) {
+        User userInDb = selectByLoginName(reqDto.getLoginName());
+        if (ObjectUtils.isEmpty(userInDb)) {
+            // 用户名不存在
+            LOG.info("用户名不存在，{}", reqDto.getLoginName());
+            throw new BusinessException(BusinessExceptionCode.LOGIN_USER_ERROR);
+        } else {
+            if (userInDb.getPassword().equals(reqDto.getPassword())) {
+                // 登录成功
+                UserLoginRespDto userLoginDto = CopyUtil.copy(userInDb, UserLoginRespDto.class);
+                return userLoginDto;
+            } else {
+                // 密码不对
+                LOG.info("密码不对，输入密码：{}, 数据库密码：{}", reqDto.getPassword(), userInDb.getPassword());
+                throw new BusinessException(BusinessExceptionCode.LOGIN_USER_ERROR);
+            }
+        }
     }
 }
