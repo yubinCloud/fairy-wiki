@@ -16,7 +16,7 @@ public class UserSaveReqDto {
     private String name;
 
     @NotNull(message = "【密码】不能为空")
-    @Pattern(regexp = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$", message = "【密码】至少包含 数字和英文，长度6-20")
+    @Pattern(regexp = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,32}$", message = "【密码】至少包含 数字和英文，长度6-32")
     private String password;
 
 }

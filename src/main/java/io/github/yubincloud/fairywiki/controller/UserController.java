@@ -6,6 +6,7 @@ import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
 import io.github.yubincloud.fairywiki.dto.resp.RestfulModel;
 import io.github.yubincloud.fairywiki.dto.resp.UserQueryRespDto;
 import io.github.yubincloud.fairywiki.service.UserService;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -26,6 +27,8 @@ public class UserController {
 
     @PostMapping("/save")
     public RestfulModel<Integer> saveUser(@RequestBody @Valid UserSaveReqDto userSaveReqDto) {
+        userSaveReqDto.setPassword(
+                DigestUtils.md5DigestAsHex(userSaveReqDto.getPassword().getBytes()));
         userService.save(userSaveReqDto);
         return new RestfulModel<>(0, "", 0);
     }
