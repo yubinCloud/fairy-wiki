@@ -73,7 +73,8 @@ public class UserService {
             }
         } else {
             // 更新
-            userMapper.updateByPrimaryKey(user);
+            user.setLoginName(null);  // 设置为空使得接下来对 user 的更新不再更新 LoginName 字段
+            userMapper.updateByPrimaryKeySelective(user);
         }
     }
 
