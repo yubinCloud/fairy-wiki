@@ -74,6 +74,7 @@ public class UserService {
         } else {
             // 更新
             user.setLoginName(null);  // 设置为空使得接下来对 user 的更新不再更新 LoginName 字段
+            user.setPassword(null);
             userMapper.updateByPrimaryKeySelective(user);
         }
     }
