@@ -4,7 +4,9 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.github.yubincloud.fairywiki.domain.User;
 import io.github.yubincloud.fairywiki.domain.UserExample;
+import io.github.yubincloud.fairywiki.dto.req.UserResetPwdReqDto;
 import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
+import io.github.yubincloud.fairywiki.dto.resp.RestfulModel;
 import io.github.yubincloud.fairywiki.exception.BusinessException;
 import io.github.yubincloud.fairywiki.exception.BusinessExceptionCode;
 import io.github.yubincloud.fairywiki.mapper.UserMapper;
@@ -98,5 +100,10 @@ public class UserService {
         } else {
             return userList.get(0);
         }
+    }
+
+    public void resetPwd(UserResetPwdReqDto reqDto) {
+        User user = CopyUtil.copy(reqDto, User.class);
+        userMapper.updateByPrimaryKeySelective(user);
     }
 }
