@@ -10,4 +10,6 @@ public class UserLoginRespDto {
     private String loginName;
 
     private String name;
+
+    private String token;
 }

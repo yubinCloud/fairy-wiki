@@ -1,12 +1,19 @@
 # 应用名称
 spring:
+  application:
+    name: fairy-wiki
+  # MySQL 配置
   datasource:
     url: jdbc:mysql://127.0.0.1/wiki?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT&useSSL=true&allowMultiQueries=true
     username: root
     password: yubin3869
     driver-class-name: com.mysql.cj.jdbc.Driver
-  application:
-    name: fairy-wiki
+  # Redis 配置
+  redis:
+    host: localhost
+    port: 6379
+    database: 1
+
 # 应用服务 WEB 访问端口
 server.port: 8880
 

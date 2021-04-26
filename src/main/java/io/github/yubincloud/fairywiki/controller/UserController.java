@@ -1,23 +1,37 @@
 package io.github.yubincloud.fairywiki.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import io.github.yubincloud.fairywiki.dto.req.UserLoginReqDto;
 import io.github.yubincloud.fairywiki.dto.req.UserQueryReqDto;
 import io.github.yubincloud.fairywiki.dto.req.UserResetPwdReqDto;
 import io.github.yubincloud.fairywiki.dto.req.UserSaveReqDto;
 import io.github.yubincloud.fairywiki.dto.resp.*;
 import io.github.yubincloud.fairywiki.service.UserService;
+import io.github.yubincloud.fairywiki.utils.SnowFlake;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
+
     @Resource
     private UserService userService;
+
+    @Resource
+    private SnowFlake snowFlake;
+
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
 
     @GetMapping("/list")
     public RestfulModel<PageRespDto<UserQueryRespDto>> list(@Valid UserQueryReqDto userQueryReqDto) {
@@ -57,6 +71,25 @@ public class UserController {
                 DigestUtils.md5DigestAsHex(userLoginReqDto.getPassword().getBytes())
         );
         UserLoginRespDto userLoginRespDto = userService.login(userLoginReqDto);
+
+        String token = Long.toString(snowFlake.nextId());
+        LOG.info("生成单点登录token：{}，并放入redis中", token);
+        userLoginRespDto.setToken(token);
+        redisTemplate.opsForValue().set(token, JSONObject.toJSONString(userLoginRespDto), 3600 * 24, TimeUnit.SECONDS);
         return new RestfulModel<>(ErrorCode.SUCCESS, "", userLoginRespDto);
+    }
+
+    @RequestMapping("/redis/set/{key}/{value}")
+    public String set(@PathVariable Long key, @PathVariable String value) {
+        redisTemplate.opsForValue().set(Long.toString(key), value, 3600, TimeUnit.SECONDS);
+        LOG.info("key: {}, value: {}", key, value);
+        return "success";
+    }
+
+    @RequestMapping("/redis/get/{key}")
+    public Object get(@PathVariable String key) {
+        Object object = redisTemplate.opsForValue().get(key);
+        LOG.info("key: {}, value: {}", key, object);
+        return object;
     }
 }
