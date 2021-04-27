@@ -21,12 +21,12 @@
       <a-menu-item key="/about">
         <router-link to="/about">关于我们</router-link>
       </a-menu-item>
-      <a class="login-menu" v-show="currUser.id">
+      <a class="login-menu" v-show="currUser.name">
         <span>Welcome, {{currUser.name}}</span>
       </a>
-      <a class="login-menu" v-show="!currUser.id" @click="showLoginModal">
+      <a class="login-menu" v-show="!currUser.name" @click="showLoginModal">
         <span>登录</span>
-      </a>
+      </a>S
     </a-menu>
 
     <a-modal
@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import {computed, defineComponent, ref} from "vue";
 import axios from 'axios';
 import { message } from 'ant-design-vue';
 import store from "@/store";
@@ -60,8 +60,7 @@ export default defineComponent({
   name: 'the-header',
   setup () {
     // 登录后保存
-    const currUser = ref();
-    currUser.value = {};
+    const currUser = computed(() => store.state.localUser);
 
     // 用来登录
     const loginUser = ref({
@@ -84,8 +83,7 @@ export default defineComponent({
         const respData = response.data;
         if (respData.code === 0) {
           loginModalVisible.value = false;
-          currUser.value = respData.data;
-          store.commit("setLocalUser", currUser.value);
+          store.commit("setLocalUser", respData.data);
           message.success("登录成功！");
         } else {
           message.error(respData.msg);
