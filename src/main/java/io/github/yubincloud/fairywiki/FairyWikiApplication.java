@@ -6,7 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.env.Environment;
+import springfox.documentation.oas.annotations.EnableOpenApi;
 
+
+@EnableOpenApi
 @SpringBootApplication
 @MapperScan("io.github.yubincloud.fairywiki.mapper")
 public class FairyWikiApplication {
