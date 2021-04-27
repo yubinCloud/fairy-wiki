@@ -1,14 +1,23 @@
 <template>
   <a-layout-footer style="text-align: center">
-    Ant Design ©2018 Created by Ant UED
+    <p v-if="currUser.name">Welcome, {{currUser.name}}</p>
+    --- Fairy Wiki ---
   </a-layout-footer>
 </template>
 
 <script lang="ts">
-import { defineComponent} from "vue";
+import {computed, defineComponent} from "vue";
+import store from "@/store";
 
 export default defineComponent({
-  name: 'the-footer'
+  name: 'the-footer',
+  setup() {
+    const currUser = computed(() => store.state.localUser);
+
+    return {
+      currUser
+    }
+  }
 })
 
 </script>
