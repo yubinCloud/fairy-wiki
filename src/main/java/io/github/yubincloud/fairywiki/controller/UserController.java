@@ -8,16 +8,21 @@ import io.github.yubincloud.fairywiki.dto.req.UserSaveReqDto;
 import io.github.yubincloud.fairywiki.dto.resp.*;
 import io.github.yubincloud.fairywiki.service.UserService;
 import io.github.yubincloud.fairywiki.utils.SnowFlake;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.util.concurrent.TimeUnit;
 
+
+@Api("用户相关接口")
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -91,5 +96,14 @@ public class UserController {
         Object object = redisTemplate.opsForValue().get(key);
         LOG.info("key: {}, value: {}", key, object);
         return object;
+    }
+
+    @ApiOperation(value = "退出登录",
+            notes = "该接口会清除掉存放于 redis 中所传入的 token")
+    @GetMapping("/logout/{userToken}")
+    public RestfulModel<Integer> logout(@PathVariable String userToken) {
+        redisTemplate.delete(userToken);
+        LOG.info("redis 中清除 token：{}", userToken);
+        return new RestfulModel<>(ErrorCode.SUCCESS, "", 0);
     }
 }
