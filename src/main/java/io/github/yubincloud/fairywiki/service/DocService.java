@@ -11,6 +11,7 @@ import io.github.yubincloud.fairywiki.dto.resp.DocQueryRespDto;
 import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
 import io.github.yubincloud.fairywiki.mapper.ContentMapper;
 import io.github.yubincloud.fairywiki.mapper.DocMapper;
+import io.github.yubincloud.fairywiki.mapper.DocMapperCustom;
 import io.github.yubincloud.fairywiki.utils.CopyUtil;
 import io.github.yubincloud.fairywiki.utils.SnowFlake;
 import org.slf4j.Logger;
@@ -31,6 +32,9 @@ public class DocService {
 
     @Resource
     private ContentMapper contentMapper;
+
+    @Resource
+    private DocMapperCustom docMapperCustom;
 
     @Resource
     private SnowFlake snowFlake;
@@ -80,6 +84,8 @@ public class DocService {
             // 新增
             Long docId = snowFlake.nextId();
             docRecord.setId(docId);
+            docRecord.setViewCount(0);
+            docRecord.setVoteCount(0);
             docMapper.insertSelective(docRecord);
 
             docContent.setId(docId);
@@ -112,6 +118,7 @@ public class DocService {
      */
     public String readDocContent(Long docId) {
         Content content = contentMapper.selectByPrimaryKey(docId);
+        docMapperCustom.increaseViewCount(docId);  // 文档阅读数 + 1
         if (ObjectUtils.isEmpty(content))
             return "";
         return content.getContent();
