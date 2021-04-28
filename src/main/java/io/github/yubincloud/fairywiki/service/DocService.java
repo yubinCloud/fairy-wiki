@@ -9,10 +9,14 @@ import io.github.yubincloud.fairywiki.dto.req.DocQueryReqDto;
 import io.github.yubincloud.fairywiki.dto.req.DocSaveReqDto;
 import io.github.yubincloud.fairywiki.dto.resp.DocQueryRespDto;
 import io.github.yubincloud.fairywiki.dto.resp.PageRespDto;
+import io.github.yubincloud.fairywiki.exception.BusinessException;
+import io.github.yubincloud.fairywiki.exception.BusinessExceptionCode;
 import io.github.yubincloud.fairywiki.mapper.ContentMapper;
 import io.github.yubincloud.fairywiki.mapper.DocMapper;
 import io.github.yubincloud.fairywiki.mapper.DocMapperCustom;
 import io.github.yubincloud.fairywiki.utils.CopyUtil;
+import io.github.yubincloud.fairywiki.utils.RedisUtil;
+import io.github.yubincloud.fairywiki.utils.RequestContext;
 import io.github.yubincloud.fairywiki.utils.SnowFlake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +42,9 @@ public class DocService {
 
     @Resource
     private SnowFlake snowFlake;
+
+    @Resource
+    private RedisUtil redisUtil;
 
     /**
      * 获取全部 Doc
@@ -129,6 +136,21 @@ public class DocService {
      * @param docId 文档的 id
      */
     public void vote(Long docId) {
+        String ip = RequestContext.getRemoteAddr();
+        String ipKey = constructIpKeyInRedis(docId, ip);
+        if (redisUtil.validateRepeatedKey(ipKey, 3600 * 24)) {
+            docMapperCustom.increaseVoteCount(docId);
+        } else {
+            throw new BusinessException(BusinessExceptionCode.VOTE_REPEAT);
+        }
         docMapperCustom.increaseVoteCount(docId);
+    }
+
+    /**
+     * 构造 IP + docID 作为存放于 redis 中的 key，24小时内不能重复
+     * @return 构造生成的 key
+     */
+    private String constructIpKeyInRedis(Long docId, String ip) {
+        return "ODC_VOTE_" + docId + "_" + ip;
     }
 }
