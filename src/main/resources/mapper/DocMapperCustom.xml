@@ -8,4 +8,10 @@
         WHERE id = #{id}
     </update>
 
+    <update id="increaseVoteCount">
+        UPDATE doc
+        SET vote_count = vote_count + 1
+        WHERE id = #{id}
+    </update>
+
 </mapper>

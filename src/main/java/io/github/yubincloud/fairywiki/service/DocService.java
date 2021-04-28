@@ -123,4 +123,12 @@ public class DocService {
             return "";
         return content.getContent();
     }
+
+    /**
+     * 为某一个文档进行点赞
+     * @param docId 文档的 id
+     */
+    public void vote(Long docId) {
+        docMapperCustom.increaseVoteCount(docId);
+    }
 }

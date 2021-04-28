@@ -67,4 +67,12 @@ public class DocController {
         String docContent = docService.readDocContent(docId);
         return new RestfulModel<>(0, "", docContent);
     }
+
+    @GetMapping("/vote/{docId}")
+    @ApiOperation(value = "为一个doc点赞")
+    @ApiParam(name = "docId", value = "文档的id", required = true)
+    public RestfulModel<Integer> voteDoc(@PathVariable Long docId) {
+        docService.vote(docId);
+        return new RestfulModel<>(0, "", 0);
+    }
 }

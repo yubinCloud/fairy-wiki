@@ -23,6 +23,11 @@
             <a-divider style="height: 2px; background-color: #9999cc"/>
           </div>
           <div class="wangeditor" :innerHTML="htmlContent"></div>
+          <div class="vote-div">
+            <a-button type="primary" shape="round" :size="'large'" @click="voteDoc">
+              <template #icon><LikeOutlined /> &nbsp;点赞：{{selectedDoc.voteCount}} </template>
+            </a-button>
+          </div>
         </a-col>
       </a-row>
     </a-layout-content>
@@ -111,17 +116,29 @@ export default defineComponent({
       }
     };
 
+    function voteDoc() {
+      axios.get('/doc/vote/' + selectedDoc.value.id).then((response) => {
+        const respData = response.data;
+        if (respData.code === 0) {
+          selectedDoc.value.voteCount++;
+        } else {
+          message.error(respData.msg);
+        }
+      });
+    }
+
     onMounted(() => {
       handleQueryDoc();
     });
 
     return {
       level1,
+      defaultSelectedKeys,
+      selectedDoc,
 
       htmlContent,
       onSelect,
-      defaultSelectedKeys,
-      selectedDoc,
+      voteDoc,
     }
   }
 });
@@ -181,5 +198,11 @@ export default defineComponent({
   margin: 20px 10px !important;  /* 加上 !important 以提高优先级从而覆盖掉原 Ant Design 的p标签样式*/
   font-size: 16px !important;
   font-weight:600;
+}
+
+/* 点赞按钮 */
+.vote-div {
+  padding: 15px;
+  text-align: center;
 }
 </style>
