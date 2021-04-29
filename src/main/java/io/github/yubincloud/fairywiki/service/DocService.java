@@ -18,10 +18,10 @@ import io.github.yubincloud.fairywiki.utils.CopyUtil;
 import io.github.yubincloud.fairywiki.utils.RedisUtil;
 import io.github.yubincloud.fairywiki.utils.RequestContext;
 import io.github.yubincloud.fairywiki.utils.SnowFlake;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -152,5 +152,12 @@ public class DocService {
      */
     private String constructIpKeyInRedis(Long docId, String ip) {
         return "ODC_VOTE_" + docId + "_" + ip;
+    }
+
+    /**
+     * 更新所有 Ebook 的阅读量、点赞量信息
+     */
+    public void updateEbookFooter() {
+        docMapperCustom.updateEbookFooter();
     }
 }

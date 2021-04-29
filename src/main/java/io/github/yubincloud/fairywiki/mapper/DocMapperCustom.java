@@ -15,4 +15,9 @@ public interface DocMapperCustom {
      * @param docId 文档的 id
      */
     void increaseVoteCount(@Param("id") Long docId);
+
+    /**
+     * 更新所有 Ebook 的阅读量、点赞量信息
+     */
+    void updateEbookFooter();
 }
