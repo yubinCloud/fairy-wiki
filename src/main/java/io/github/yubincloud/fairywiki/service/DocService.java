@@ -18,10 +18,11 @@ import io.github.yubincloud.fairywiki.utils.CopyUtil;
 import io.github.yubincloud.fairywiki.utils.RedisUtil;
 import io.github.yubincloud.fairywiki.utils.RequestContext;
 import io.github.yubincloud.fairywiki.utils.SnowFlake;
-import org.apache.commons.lang3.ObjectUtils;
+import io.github.yubincloud.fairywiki.websocket.WebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -45,6 +46,9 @@ public class DocService {
 
     @Resource
     private RedisUtil redisUtil;
+
+    @Resource
+    private WebSocketServer webSocketServer;
 
     /**
      * 获取全部 Doc
@@ -143,7 +147,9 @@ public class DocService {
         } else {
             throw new BusinessException(BusinessExceptionCode.VOTE_REPEAT);
         }
-        docMapperCustom.increaseVoteCount(docId);
+        // 向 ws 推送消息
+        Doc docInDb = docMapper.selectByPrimaryKey(docId);
+        webSocketServer.sendInfo("【" + docInDb.getName() + "】被点赞！");
     }
 
     /**
