@@ -18,11 +18,11 @@ import io.github.yubincloud.fairywiki.utils.CopyUtil;
 import io.github.yubincloud.fairywiki.utils.RedisUtil;
 import io.github.yubincloud.fairywiki.utils.RequestContext;
 import io.github.yubincloud.fairywiki.utils.SnowFlake;
-import io.github.yubincloud.fairywiki.websocket.WebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
@@ -89,6 +89,7 @@ public class DocService {
     /**
      * 根据 DocSaveReqDto 来保存一个 doc 记录，若 id 为空则新增，不为空则更新
      */
+    @Transactional
     public void save(DocSaveReqDto reqDto) {
         Doc docRecord = CopyUtil.copy(reqDto, Doc.class);
         Content docContent = CopyUtil.copy(reqDto, Content.class);
@@ -150,7 +151,8 @@ public class DocService {
         }
         // 向 ws 推送消息
         Doc docInDb = docMapper.selectByPrimaryKey(docId);
-        wsService.sendInfo("【" + docInDb.getName() + "】被点赞！");
+        String logId = MDC.get("LOG_ID");
+        wsService.sendInfo("【" + docInDb.getName() + "】被点赞！", logId);
     }
 
     /**
