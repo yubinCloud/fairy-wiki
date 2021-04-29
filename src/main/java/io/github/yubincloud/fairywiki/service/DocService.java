@@ -18,6 +18,7 @@ import io.github.yubincloud.fairywiki.utils.CopyUtil;
 import io.github.yubincloud.fairywiki.utils.RedisUtil;
 import io.github.yubincloud.fairywiki.utils.RequestContext;
 import io.github.yubincloud.fairywiki.utils.SnowFlake;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -50,6 +51,9 @@ public class DocService {
 
     @Resource
     private WsService wsService;
+
+    @Resource
+    private RocketMQTemplate rocketMQTemplate;
 
     /**
      * 获取全部 Doc
@@ -144,7 +148,7 @@ public class DocService {
     public void vote(Long docId) {
         String ip = RequestContext.getRemoteAddr();
         String ipKey = constructIpKeyInRedis(docId, ip);
-        if (redisUtil.validateRepeatedKey(ipKey, 3600 * 24)) {
+        if (redisUtil.validateRepeatedKey(ipKey, 5000)) {
             docMapperCustom.increaseVoteCount(docId);
         } else {
             throw new BusinessException(BusinessExceptionCode.VOTE_REPEAT);
@@ -152,7 +156,8 @@ public class DocService {
         // 向 ws 推送消息
         Doc docInDb = docMapper.selectByPrimaryKey(docId);
         String logId = MDC.get("LOG_ID");
-        wsService.sendInfo("【" + docInDb.getName() + "】被点赞！", logId);
+        // wsService.sendInfo("【" + docInDb.getName() + "】被点赞！", logId);
+        rocketMQTemplate.convertAndSend("VOTE_TOPIC", "【" + docInDb.getName() + "】被点赞！");
     }
 
     /**

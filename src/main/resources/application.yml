@@ -22,3 +22,9 @@ server.port: 8880
 mybatis:
   mapper-locations: classpath:/mapper/**/*.xml
 
+# RocketMQ 配置
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: default
+
