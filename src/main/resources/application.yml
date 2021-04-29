@@ -1,12 +1,19 @@
 # 应用名称
 spring:
+  application:
+    name: fairy-wiki
+  # MySQL 配置
   datasource:
     url: jdbc:mysql://127.0.0.1/wiki?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT&useSSL=true&allowMultiQueries=true
     username: root
     password: yubin3869
     driver-class-name: com.mysql.cj.jdbc.Driver
-  application:
-    name: fairy-wiki
+  # Redis 配置
+  redis:
+    host: localhost
+    port: 6379
+    database: 1
+
 # 应用服务 WEB 访问端口
 server.port: 8880
 
@@ -14,4 +21,10 @@ server.port: 8880
 # 配置mybatis所有Mapper.xml所在的路径
 mybatis:
   mapper-locations: classpath:/mapper/**/*.xml
+
+# RocketMQ 配置
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: default
 

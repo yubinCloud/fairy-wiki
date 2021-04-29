@@ -14,7 +14,20 @@
           </a-tree>
         </a-col>
         <a-col :span="18">
+          <div>
+            <h2>{{selectedDoc.name}}</h2>
+            <div>
+              <span>阅读数：{{selectedDoc.viewCount}}</span> &nbsp; &nbsp;
+              <span>点赞数：{{selectedDoc.voteCount}}</span>
+            </div>
+            <a-divider style="height: 2px; background-color: #9999cc"/>
+          </div>
           <div class="wangeditor" :innerHTML="htmlContent"></div>
+          <div class="vote-div">
+            <a-button type="primary" shape="round" :size="'large'" @click="voteDoc">
+              <template #icon><LikeOutlined /> &nbsp;点赞：{{selectedDoc.voteCount}} </template>
+            </a-button>
+          </div>
         </a-col>
       </a-row>
     </a-layout-content>
@@ -38,6 +51,10 @@ export default defineComponent({
     htmlContent.value = "";
     const defaultSelectedKeys = ref();  // 初始时默认选中的文档 keys
     defaultSelectedKeys.value = [];
+
+    // 当前选中的文档
+    const selectedDoc = ref();
+    selectedDoc.value = {};
 
     /**
      * 一级文档树，children属性就是二级文档
@@ -83,6 +100,7 @@ export default defineComponent({
           if (Tool.isNotEmpty(level1)) {
             defaultSelectedKeys.value = [level1.value[0].id];  // 默认选中 level1 的第一个文档
             handleQueryDocContent(level1.value[0].id);  // 并对该默认选中的文档进行一次内容查询并展示出来
+            selectedDoc.value = level1.value[0];  // 初始显示文档信息
           }
         } else {
           message.error(respData.message);
@@ -93,10 +111,21 @@ export default defineComponent({
     const onSelect = (selectedKeys: any, info: any) => {
       console.log('selected', selectedKeys, info);
       if (Tool.isNotEmpty(selectedKeys)) {
-        // 加载内容
-        handleQueryDocContent(selectedKeys[0]);
+        handleQueryDocContent(selectedKeys[0]);  // 加载内容
+        selectedDoc.value = info.selectedNodes[0].props;  // 加载文档信息
       }
     };
+
+    function voteDoc() {
+      axios.get('/doc/vote/' + selectedDoc.value.id).then((response) => {
+        const respData = response.data;
+        if (respData.code === 0) {
+          selectedDoc.value.voteCount++;
+        } else {
+          message.error(respData.msg);
+        }
+      });
+    }
 
     onMounted(() => {
       handleQueryDoc();
@@ -104,10 +133,12 @@ export default defineComponent({
 
     return {
       level1,
+      defaultSelectedKeys,
+      selectedDoc,
 
       htmlContent,
       onSelect,
-      defaultSelectedKeys
+      voteDoc,
     }
   }
 });
@@ -167,5 +198,11 @@ export default defineComponent({
   margin: 20px 10px !important;  /* 加上 !important 以提高优先级从而覆盖掉原 Ant Design 的p标签样式*/
   font-size: 16px !important;
   font-weight:600;
+}
+
+/* 点赞按钮 */
+.vote-div {
+  padding: 15px;
+  text-align: center;
 }
 </style>

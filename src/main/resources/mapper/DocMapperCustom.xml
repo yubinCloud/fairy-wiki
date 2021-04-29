@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.github.yubincloud.fairywiki.mapper.DocMapperCustom" >
+
+    <update id="increaseViewCount">
+        UPDATE doc
+        SET view_count = view_count + 1
+        WHERE id = #{id}
+    </update>
+
+    <update id="increaseVoteCount">
+        UPDATE doc
+        SET vote_count = vote_count + 1
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateEbookFooter">
+        UPDATE ebook t1, (
+            SELECT ebook_id, count(1) doc_count, sum(view_count) view_count, sum(vote_count) vote_count
+            FROM doc
+            GROUP BY ebook_id) t2
+        SET t1.doc_count = t2.doc_count, t1.view_count = t2.view_count, t1.vote_count = t2.vote_count
+        WHERE t1.id = t2.ebook_id
+    </update>
+
+</mapper>

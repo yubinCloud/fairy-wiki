@@ -24,7 +24,10 @@
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
                         connectionURL="jdbc:mysql://127.0.0.1/wiki?useUnicode=true&amp;characterEncoding=utf-8&amp;serverTimezone=GMT&amp;useSSL=true&amp;allowMultiQueries=true"
                         userId="root"
-                        password="yubin3869">
+                        password="yubin3869"
+        >
+            <property name="serverTimezone" value="GMT"/>
+            <property name="nullCatalogMeansCurrent" value="true"/>
         </jdbcConnection>
 
         <!-- domain类的位置 -->
@@ -40,6 +43,6 @@
                              targetPackage="io.github.yubincloud.fairywiki.mapper"
                              type="XMLMAPPER"/>
 
-        <table tableName="content"/>
+        <table tableName="user" domainObjectName="User"/>
     </context>
 </generatorConfiguration>
