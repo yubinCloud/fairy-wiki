@@ -21,6 +21,7 @@ import io.github.yubincloud.fairywiki.utils.SnowFlake;
 import io.github.yubincloud.fairywiki.websocket.WebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -48,7 +49,7 @@ public class DocService {
     private RedisUtil redisUtil;
 
     @Resource
-    private WebSocketServer webSocketServer;
+    private WsService wsService;
 
     /**
      * 获取全部 Doc
@@ -149,7 +150,7 @@ public class DocService {
         }
         // 向 ws 推送消息
         Doc docInDb = docMapper.selectByPrimaryKey(docId);
-        webSocketServer.sendInfo("【" + docInDb.getName() + "】被点赞！");
+        wsService.sendInfo("【" + docInDb.getName() + "】被点赞！");
     }
 
     /**
@@ -166,4 +167,5 @@ public class DocService {
     public void updateEbookFooter() {
         docMapperCustom.updateEbookFooter();
     }
+
 }
