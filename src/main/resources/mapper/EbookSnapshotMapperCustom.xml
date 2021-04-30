@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.github.yubincloud.fairywiki.mapper.EbookSnapshotMapperCustom" >
+
+    <!--
+    # 方案一（ID不连续）：
+    #   删除今天的数据
+    #   为所有的电子书生成一条今天的记录
+    #   更新总阅读数、总点赞数
+    #   更新今日阅读数、今日点赞数
+    # 方案二（ID连续）：
+    #   为所有的电子书生成一条今天的记录，如果还没有
+    #   更新总阅读数、总点赞数
+    #   更新今日阅读数、今日点赞数
+    -->
+    <update id="genSnapshot">
+        INSERT INTO ebook_snapshot(ebook_id, `date`, view_count, vote_count, view_increase, vote_increase)
+        SELECT t1.id, curdate(), 0, 0, 0, 0
+        FROM ebook t1
+        WHERE NOT EXISTS(SELECT 1
+                         FROM ebook_snapshot t2
+                         WHERE t1.id = t2.ebook_id
+                           AND t2.`date` = curdate());
+
+        UPDATE ebook_snapshot t1, ebook t2
+        SET t1.view_count = t2.view_count,
+            t1.vote_count = t2.vote_count
+        WHERE t1.`date` = curdate()
+          AND t1.ebook_id = t2.id;
+
+        UPDATE ebook_snapshot t1 LEFT JOIN (SELECT ebook_id, view_count, vote_count
+                                            FROM ebook_snapshot
+                                            WHERE `date` = date_sub(curdate(), INTERVAL 1 DAY)) t2
+            ON t1.ebook_id = t2.ebook_id
+        SET t1.view_increase = (t1.view_count - ifnull(t2.view_count, 0)),
+            t1.vote_increase = (t1.vote_count - ifnull(t2.vote_count, 0))
+        WHERE t1.`date` = curdate();
+    </update>
+
+    <select id="getStatistic" resultType="io.github.yubincloud.fairywiki.dto.resp.StatisticRespDto">
+        SELECT
+            t1.`date` AS `date`,
+            SUM(t1.view_count) AS viewCount,
+            SUM(t1.vote_count) AS voteCount,
+            SUM(t1.view_increase) AS viewIncrease,
+            SUM(t1.vote_increase) AS voteIncrease
+        FROM
+            ebook_snapshot t1
+        WHERE
+            t1.`date` >= date_sub(curdate(), INTERVAL 1 DAY)
+        GROUP BY
+            t1.`date`
+        ORDER BY
+            t1.`date` ASC;
+    </select>
+
+    <select id="get30DayStatistic" resultType="io.github.yubincloud.fairywiki.dto.resp.StatisticRespDto">
+        SELECT
+            t1.`date` AS `date`,
+            SUM(t1.view_count) AS viewCount,
+            SUM(t1.vote_count) AS voteCount
+        FROM
+            ebook_snapshot t1
+        WHERE
+            t1.`date` >= date_sub(curdate(), INTERVAL 30 DAY)
+        GROUP BY
+            t1.`date`
+        ORDER BY
+            t1.`date` ASC;
+    </select>
+
+
+</mapper>
