@@ -54,4 +54,20 @@
             t1.`date` ASC;
     </select>
 
+    <select id="get30DayStatistic" resultType="io.github.yubincloud.fairywiki.dto.resp.StatisticRespDto">
+        SELECT
+            t1.`date` AS `date`,
+            SUM(t1.view_count) AS viewCount,
+            SUM(t1.vote_count) AS voteCount
+        FROM
+            ebook_snapshot t1
+        WHERE
+            t1.`date` >= date_sub(curdate(), INTERVAL 30 DAY)
+        GROUP BY
+            t1.`date`
+        ORDER BY
+            t1.`date` ASC;
+    </select>
+
+
 </mapper>

@@ -23,9 +23,16 @@ public class EbookSnapshotController {
     private EbookSnapshotService ebookSnapshotService;
 
     @GetMapping("/get-statistic")
-    @ApiOperation(value = "从电子书快照中获取统计数据")
+    @ApiOperation(value = "从电子书快照中昨天和今天的获取统计数据")
     public RestfulModel<List<StatisticRespDto>> getStatistic() {
         List<StatisticRespDto> statisticRespDtoList = ebookSnapshotService.getStatistic();
+        return new RestfulModel<>(ErrorCode.SUCCESS, "", statisticRespDtoList);
+    }
+
+    @GetMapping("/get-30-statistic")
+    @ApiOperation(value = "从电子书快照中获取近30天的统计数据")
+    public RestfulModel<List<StatisticRespDto>> get30DayStatistic() {
+        List<StatisticRespDto> statisticRespDtoList = ebookSnapshotService.get30DayStatistic();
         return new RestfulModel<>(ErrorCode.SUCCESS, "", statisticRespDtoList);
     }
 }

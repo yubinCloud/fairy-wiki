@@ -8,4 +8,6 @@ public interface EbookSnapshotMapperCustom {
     void genSnapshot();
 
     List<StatisticRespDto> getStatistic();
+
+    List<StatisticRespDto> get30DayStatistic();
 }

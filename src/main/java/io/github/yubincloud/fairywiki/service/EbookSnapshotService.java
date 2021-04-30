@@ -32,4 +32,11 @@ public class EbookSnapshotService {
         }
         return statisticDataList;
     }
+
+    /**
+     * 30天数值统计
+     */
+    public List<StatisticRespDto> get30DayStatistic() {
+        return ebookSnapshotMapperCustom.get30DayStatistic();
+    }
 }
