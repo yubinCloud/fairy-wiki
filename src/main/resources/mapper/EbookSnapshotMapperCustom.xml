@@ -37,4 +37,21 @@
         WHERE t1.`date` = curdate();
     </update>
 
+    <select id="getStatistic" resultType="io.github.yubincloud.fairywiki.dto.resp.StatisticRespDto">
+        SELECT
+            t1.`date` AS `date`,
+            SUM(t1.view_count) AS viewCount,
+            SUM(t1.vote_count) AS voteCount,
+            SUM(t1.view_increase) AS viewIncrease,
+            SUM(t1.vote_increase) AS voteIncrease
+        FROM
+            ebook_snapshot t1
+        WHERE
+            t1.`date` >= date_sub(curdate(), INTERVAL 1 DAY)
+        GROUP BY
+            t1.`date`
+        ORDER BY
+            t1.`date` ASC;
+    </select>
+
 </mapper>
