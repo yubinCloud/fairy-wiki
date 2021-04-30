@@ -64,7 +64,7 @@ import {defineComponent, onMounted, ref} from 'vue';
 import axios from 'axios';
 import { StarOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons-vue';
 import {Tool} from "@/util/tool";
-import {message} from "_ant-design-vue@2.0.0-rc.3@ant-design-vue";
+import {message} from "ant-design-vue";
 import {Category} from "@/models";
 import TheWelcome from "@/components/the-welcome.vue"
 

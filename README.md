@@ -51,9 +51,9 @@
   + 在 /web 子目录下，运行一下命令：
 
   ```bash
-  $ npm install
+  $ cnpm -- install
   ...
-  $ npm start serve-dev
+  $ cnpm run serve-dev
   ...
   ```
 
