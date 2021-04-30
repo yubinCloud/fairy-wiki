@@ -274,7 +274,7 @@ export default defineComponent({
       handleQueryContent();
 
       // 不能选择当前节点及其所有子孙节点，作为父节点，会使树断开
-      treeSelectData.value = Tool.copy(level1.value);
+      treeSelectData.value = Tool.copy(level1.value) || [];
       setDisable(treeSelectData.value, record.id);
 
       // 为选择树添加一个"无"
@@ -290,7 +290,7 @@ export default defineComponent({
       doc.value = {
         ebookId: route.query.ebookId
       };
-      treeSelectData.value = Tool.copy(level1.value);
+      treeSelectData.value = Tool.copy(level1.value) || [];
 
       // 为选择树添加一个"无"
       treeSelectData.value.unshift({id: 0, name: '无'});
